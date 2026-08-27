@@ -4,11 +4,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_ADMIN = os.getenv("DB_ADMIN")
-DB_NOME = os.getenv("DB_NOME", "postgres")
-DB_USUARIO = os.getenv("DB_USUARIO", "postgres")
-DB_SENHA = os.getenv("DB_SENHA")
-DB_PORT = os.getenv("DB_PORT", "5432")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Configurações do Supabase ausentes no arquivo .env!")
+
+# Inicializa o cliente do Supabase
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 CREATE_TABLES_SQL = """
 CREATE TABLE IF NOT EXISTS usuario(
@@ -16,7 +19,7 @@ CREATE TABLE IF NOT EXISTS usuario(
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    is_consultora BOOLEAN DEFAUT FALSE,
+    is_consultora BOOLEAN DEFAULT FALSE,
     foto_perfil TEXT,
     data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -47,10 +50,10 @@ def estruturando_banco():
 
     try:
         conexao = psycopg2.connect(
-            admin = DB_ADMIN,
-            banco = DB_NOME,
-            usuario = DB_USUARIO,
-            senha = DB_SENHA,
+            host = DB_ADMIN,
+            database = DB_NOME,
+            user = DB_USUARIO,
+            password = DB_SENHA,
             port = DB_PORT
         )
         cursor = conexao.cursor()
@@ -61,7 +64,7 @@ def estruturando_banco():
         print(f"erro ao criar tabelas: {error}")
 
     finally:
-        if 'conexao' in locals() and connection:
+        if 'conexao' in locals() and conexao:
             cursor.close()
             conexao.close()
 if __name__ == "__main__":
