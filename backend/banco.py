@@ -4,14 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("Configurações do Supabase ausentes no arquivo .env!")
-
-# Inicializa o cliente do Supabase
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 CREATE_TABLES_SQL = """
 CREATE TABLE IF NOT EXISTS usuario(
@@ -45,17 +38,11 @@ CREATE TABLE IF NOT EXISTS pecas(
 """
 
 def estruturando_banco():
-    if not DB_SENHA or not DB_ADMIN:
-        raise ValueError("")
+    if not DATABASE_URL:
+        raise ValueError("A variavel nao foi informada corretamente!")
 
     try:
-        conexao = psycopg2.connect(
-            host = DB_ADMIN,
-            database = DB_NOME,
-            user = DB_USUARIO,
-            password = DB_SENHA,
-            port = DB_PORT
-        )
+        conexao = psycopg2.connect(DATABASE_URL)
         cursor = conexao.cursor()
         cursor.execute(CREATE_TABLES_SQL)
         conexao.commit()

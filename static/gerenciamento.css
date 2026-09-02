@@ -1,0 +1,513 @@
+.mainGerenciamento{
+    display:flex;
+    grid-template-columns:none;
+    min-height:calc(100vh - 72px);
+    align-items:stretch;
+}
+
+/* ---------- barra superior ---------- */
+
+.barraTopo{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 32px;
+    background:var(--black);
+    color:#fff;
+    gap:24px;
+    flex-wrap:wrap;
+}
+
+.marcaTopo{
+    font-family:'Bodoni Moda', serif;
+    font-size:1.3rem;
+    letter-spacing:0.02em;
+    white-space:nowrap;
+}
+
+.controlesTopo{
+    display:flex;
+    align-items:center;
+    gap:26px;
+    flex-wrap:wrap;
+}
+
+.linkFinanceiro{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color:#f0ede8;
+    text-decoration:none;
+    font-family:'Jost', sans-serif;
+    font-size:0.85rem;
+    letter-spacing:0.02em;
+    padding-bottom:2px;
+    border-bottom:1px solid transparent;
+    transition:color .25s ease, border-color .25s ease;
+}
+
+.linkFinanceiro svg{
+    width:16px;
+    height:16px;
+    stroke:var(--accent);
+    fill:none;
+}
+
+.linkFinanceiro:hover,
+.linkFinanceiro:focus-visible{
+    color:#fff;
+    border-color:#fff;
+}
+
+.controleVisao{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+}
+
+.rotuloVisao{
+    font-family:'Jost', sans-serif;
+    font-size:0.85rem;
+    color:#f0ede8;
+    white-space:nowrap;
+}
+
+.alternador{
+    position:relative;
+    display:inline-block;
+    width:40px;
+    height:22px;
+    flex:none;
+}
+
+.alternador input{
+    position:absolute;
+    opacity:0;
+    width:100%;
+    height:100%;
+    margin:0;
+    cursor:pointer;
+}
+
+.trilhaAlternador{
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,0.28);
+    border-radius:20px;
+    transition:background .25s ease;
+    pointer-events:none;
+}
+
+.trilhaAlternador::before{
+    content:'';
+    position:absolute;
+    top:2px;
+    left:2px;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#fff;
+    transition:transform .25s ease;
+}
+
+.alternador input:checked + .trilhaAlternador{
+    background:var(--accent);
+}
+
+.alternador input:checked + .trilhaAlternador::before{
+    transform:translateX(18px);
+}
+
+.alternador input:focus-visible + .trilhaAlternador{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+}
+
+.botaoIcone{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    border:none;
+    color:#f0ede8;
+    cursor:pointer;
+    padding:4px;
+    transition:color .25s ease, transform .2s ease;
+}
+
+.botaoIcone svg{
+    width:19px;
+    height:19px;
+    stroke:currentColor;
+    fill:none;
+}
+
+.botaoIcone:hover,
+.botaoIcone:focus-visible{
+    color:#fff;
+    transform:translateY(-1px);
+}
+
+.botaoNotificacao{
+    position:relative;
+}
+
+.contadorNotificacao{
+    position:absolute;
+    top:-4px;
+    right:-6px;
+    min-width:16px;
+    height:16px;
+    padding:0 3px;
+    border-radius:50%;
+    background:var(--accent);
+    color:var(--black);
+    font-size:0.62rem;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+}
+
+/* foco visível geral */
+.botaoIcone:focus-visible,
+.itemCliente:focus-visible,
+.abaCliente:focus-visible,
+.linkFinanceiro:focus-visible,
+.setaCarrossel:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:3px;
+    border-radius:4px;
+}
+
+/* ---------- barra lateral de clientes ---------- */
+
+.listaClientes{
+    width:280px;
+    flex:none;
+    border-right:1px solid #e6e2da;
+    padding:26px 22px;
+    display:flex;
+    flex-direction:column;
+    background:var(--paper);
+}
+
+.cabecalhoClientes{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:22px;
+}
+
+.tituloClientes{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.tituloClientes svg{
+    width:20px;
+    height:20px;
+    stroke:var(--black);
+    fill:none;
+}
+
+.tituloClientes h2{
+    font-family:'Jost', sans-serif;
+    font-size:1.2rem;
+    font-weight:600;
+}
+
+.scrollClientes{
+    overflow-y:auto;
+    padding-right:6px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.scrollClientes::-webkit-scrollbar{
+    width:5px;
+}
+
+.scrollClientes::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.scrollClientes::-webkit-scrollbar-thumb{
+    background:var(--black);
+    border-radius:10px;
+}
+
+.scrollClientes{
+    scrollbar-width:thin;
+    scrollbar-color:var(--black) transparent;
+}
+
+.itemCliente{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    border:none;
+    border-radius:30px;
+    padding:9px 16px 9px 9px;
+    background:var(--black);
+    color:#fff;
+    font-family:'Jost', sans-serif;
+    font-size:0.92rem;
+    font-weight:500;
+    cursor:pointer;
+    text-align:left;
+    transition:background .25s ease, transform .2s ease;
+}
+
+.itemCliente img{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    object-fit:cover;
+    flex:none;
+}
+
+.itemCliente:hover{
+    transform:translateX(2px);
+}
+
+.itemCliente[aria-current="true"]{
+    background:#d8d4cb;
+    color:var(--black);
+}
+
+/* ---------- conteúdo do cliente ---------- */
+
+.conteudoCliente{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+}
+
+.cabecalhoCliente{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:24px 36px 18px;
+}
+
+.cabecalhoCliente img{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.cabecalhoCliente h1{
+    font-family:'Jost', sans-serif;
+    font-size:1.25rem;
+    font-weight:600;
+}
+
+.abasCliente{
+    display:flex;
+    gap:36px;
+    padding:0 36px;
+    border-bottom:1px solid #e6e2da;
+    overflow-x:auto;
+}
+
+.abaCliente{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:none;
+    border:none;
+    padding:14px 2px;
+    font-family:'Jost', sans-serif;
+    font-size:0.88rem;
+    font-weight:500;
+    color:var(--muted);
+    cursor:pointer;
+    white-space:nowrap;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    transition:color .25s ease, border-color .25s ease;
+}
+
+.abaCliente svg{
+    width:16px;
+    height:16px;
+    stroke:currentColor;
+    fill:none;
+}
+
+.abaCliente:hover{
+    color:var(--black);
+}
+
+.abaCliente[aria-selected="true"]{
+    color:var(--black);
+    border-color:var(--black);
+}
+
+.painelGraficos{
+    padding:32px 36px 48px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+}
+
+.cartaoGrafico{
+    border-radius:20px;
+    padding:22px 24px;
+    min-height:250px;
+    display:flex;
+    flex-direction:column;
+}
+
+.cartaoGrafico h3{
+    font-family:'Jost', sans-serif;
+    font-size:1rem;
+    font-weight:600;
+}
+
+.tomLaranja{ background:#f2ca8c; color:#4a3213; }
+.tomAzul{ background:#5480f2; color:#fff; }
+.tomRosa{ background:#ef4fa0; color:#fff; }
+
+.espacoGrafico{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:14px;
+    border:1.5px dashed rgba(0,0,0,0.18);
+    border-radius:14px;
+}
+
+.tomAzul .espacoGrafico,
+.tomRosa .espacoGrafico{
+    border-color:rgba(255,255,255,0.35);
+}
+
+.avisoGrafico{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    text-align:center;
+    padding:12px;
+}
+
+.avisoGrafico svg{
+    width:26px;
+    height:26px;
+    stroke:currentColor;
+    fill:none;
+    opacity:0.7;
+}
+
+.avisoGrafico span{
+    font-family:'Jost', sans-serif;
+    font-size:0.8rem;
+    font-weight:400;
+    opacity:0.8;
+}
+
+/* cartão de looks favoritos: carrossel de miniaturas */
+
+.carrosselFavoritos{
+    position:relative;
+    flex:1;
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    border-radius:14px;
+}
+
+.carrosselFavoritos::-webkit-scrollbar{
+    display:none;
+}
+
+.carrosselFavoritos img{
+    scroll-snap-align:start;
+    flex:none;
+    width:96px;
+    height:100%;
+    min-height:150px;
+    object-fit:cover;
+    border-radius:12px;
+}
+
+.setaCarrossel{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:none;
+    background:rgba(17,17,17,0.55);
+    color:#fff;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background .25s ease;
+}
+
+.setaCarrossel svg{
+    width:16px;
+    height:16px;
+    stroke:currentColor;
+    fill:none;
+}
+
+.setaCarrossel:hover{
+    background:rgba(17,17,17,0.8);
+}
+
+/* ---------- responsividade ---------- */
+
+@media (max-width:1100px){
+    .painelGraficos{grid-template-columns:1fr;}
+}
+
+@media (max-width:900px){
+    .mainGerenciamento{flex-direction:column;}
+    .listaClientes{
+        width:100%;
+        border-right:none;
+        border-bottom:1px solid #e6e2da;
+    }
+    .scrollClientes{
+        flex-direction:row;
+        overflow-x:auto;
+        overflow-y:visible;
+        padding-bottom:6px;
+    }
+    .itemCliente{width:auto;}
+    .barraTopo{padding:18px 22px;}
+    .cabecalhoCliente,
+    .abasCliente,
+    .painelGraficos{padding-left:22px; padding-right:22px;}
+}
+
+@media (max-width:560px){
+    .controlesTopo{gap:16px;}
+    .rotuloVisao{display:none;}
+    .marcaTopo{font-size:1.1rem;}
+    .painelGraficos{padding:24px 18px 36px; gap:16px;}
+    .cartaoGrafico{min-height:210px; padding:18px;}
+}
+
+@media (prefers-reduced-motion: reduce){
+    .itemCliente, .abaCliente, .botaoIcone, .linkFinanceiro, .setaCarrossel, .trilhaAlternador, .trilhaAlternador::before{
+        transition:none;
+    }
+}

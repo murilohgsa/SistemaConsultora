@@ -205,15 +205,6 @@ main{
     transform:translateY(-1px);
 }
 
-
-/*feed*/
-
-.nav-acoes {
-    display: flex;
-    align-items: center;
-    gap: 25px; /* Espaçamento entre os ícones */
-}
-
 /*responsividade*/
 @media (max-width:900px){
     main{grid-template-columns:1fr;}

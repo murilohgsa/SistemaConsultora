@@ -1,31 +1,138 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Isabela Andrade</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isabela Andrade — Guarda Roupa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/feed.css">
 </head>
-<header>
-    <div class="logo">Isabela Andrade</div>
-    <div class="nav-acoes">
-        <i class="lupa"></i>
-        <button class="btn-adicionar">
-            <i class="adc-imagem"></i> Adicionar Imagem
-        </button>
-        <div class="notificacao">
-            <i class="sino"></i>
-        </div>
-    </div>
-</header>
 <body>
-    
+
+  <!-- barra superior: identidade da cliente e ações rápidas -->
+  <header class="barraCliente">
+    <div class="nomeCliente">Isabela Andrade</div>
+    <div class="acoesCliente">
+      <button class="botaoIcone" type="button" aria-label="Buscar looks">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="botaoAdicionar" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>Adicionar Imagem</span>
+      </button>
+      <button class="botaoIcone botaoNotificacao" type="button" aria-label="Notificações, 1 nova">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
+        <span class="contadorNotificacao" aria-hidden="true">1</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="mainFeed">
+    <section class="guardaRoupa" aria-labelledby="tituloGuardaRoupa">
+
+      <!-- linhas decorativas de fundo, mesma linguagem visual da tela de login -->
+      <svg class="linhasFundo" viewBox="0 0 1200 700" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1" aria-hidden="true">
+        <path d="M0 60 C 220 160, 380 20, 560 120 C 740 220, 900 40, 1200 140"/>
+        <path d="M0 140 C 240 240, 400 100, 580 200 C 760 300, 920 120, 1200 220"/>
+        <path d="M0 220 C 260 320, 420 180, 600 280 C 780 380, 940 200, 1200 300"/>
+        <path d="M0 420 C 220 340, 380 500, 560 420 C 740 340, 900 500, 1200 420"/>
+        <path d="M0 500 C 240 420, 400 580, 580 500 C 760 420, 920 580, 1200 500"/>
+        <path d="M0 580 C 260 500, 420 640, 600 580 C 780 520, 940 640, 1200 580"/>
+      </svg>
+
+      <div class="cabecalhoGuardaRoupa">
+        <div class="tituloGuardaRoupa">
+          <svg viewBox="0 0 24 24"><path d="M12 3a2 2 0 0 1 2 2c0 .9-.6 1.6-1.4 1.9L20 12.5c1 .6 1.6 1.6 1.6 2.7v.3H2.4v-.3c0-1.1.6-2.1 1.6-2.7l7.4-5.6C10.6 6.6 10 5.9 10 5a2 2 0 0 1 2-2Z"/><line x1="2.4" y1="18.5" x2="21.6" y2="18.5"/></svg>
+          <h2 id="tituloGuardaRoupa">Guarda Roupa</h2>
+        </div>
+
+        <button class="pillFiltro" type="button" aria-haspopup="true">
+          <svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v6l-4-2v-4Z"/></svg>
+          Festa
+        </button>
+      </div>
+
+      <ul class="grade" role="list">
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 1">
+            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=600&auto=format&fit=crop" alt="Conjunto preto e branco com calça alfaiataria e regata" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="true" aria-label="Remover Look 1 dos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 1</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 2">
+            <img src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?q=80&w=600&auto=format&fit=crop" alt="Camisa azul clara e calça jeans wide leg" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="true" aria-label="Remover Look 2 dos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 2</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 3">
+            <img src="https://images.unsplash.com/photo-1520975954732-35dd22299614?q=80&w=600&auto=format&fit=crop" alt="Blazer cinza com camisa vermelha e calça clara" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="true" aria-label="Remover Look 3 dos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 3</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 4">
+            <img src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=600&auto=format&fit=crop" alt="Camisa azul marinho aberta e calça jeans" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 4 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 4</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 5">
+            <img src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=600&auto=format&fit=crop" alt="Vestido branco em ambiente à beira-mar" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 5 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 5</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 6">
+            <img src="https://images.unsplash.com/photo-1479064555552-3ef4979f8908?q=80&w=600&auto=format&fit=crop" alt="Composição de bota, bolsa e acessórios" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 6 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 6</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 7">
+            <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600&auto=format&fit=crop" alt="Look com óculos de sol e camiseta estampada" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 7 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 7</span>
+          </a>
+        </li>
+        <li>
+          <a class="cardLook" href="#" aria-label="Abrir Look 8">
+            <img src="https://images.unsplash.com/photo-1554568218-0f1715e72254?q=80&w=600&auto=format&fit=crop" alt="Camiseta branca estampada em fundo neutro" loading="lazy">
+            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 8 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
+              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
+            </button>
+            <span class="nomeLook">Look 8</span>
+          </a>
+        </li>
+      </ul>
+
+    </section>
+  </main>
+
 </body>
-
-<footer>
-
-</footer>
+<script src="script.js"></script>
 </html>
