@@ -32,7 +32,13 @@
     </section>
 
     <section class="login">
-      <div class="caixaLogin">
+      <form class="caixaLogin" action="/login" method="post">
+        {% with mensagens = get_flashed_messages() %}
+          {% if mensagens %}
+            <p role="alert">{{ mensagens[0] }}</p>
+          {% endif %}
+        {% endwith %}
+
         <div class="campoLogin">
           <label for="email">Email</label>
           <input type="email" id="email" name="email" placeholder="seu@email.com">
@@ -47,9 +53,9 @@
           <a href="#" class="esqueciSenha">Esqueci minha senha</a>
         </div>
         <div class="divBotao">
-          <button class="btnEntrar" type="button">Entrar</button>
+          <button class="btnEntrar" type="submit">Entrar</button>
         </div>
-      </div>
+      </form>
     </section>
   </main>
 
