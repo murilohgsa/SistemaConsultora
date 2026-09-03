@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/login.css">
 <link rel="stylesheet" href="/static/gerenciamento.css">
 </head>
 <body>
@@ -43,12 +43,36 @@
     <aside class="listaClientes" aria-label="Lista de clientes">
       <div class="cabecalhoClientes">
         <div class="tituloClientes">
-          <svg viewBox="0 0 24 24"><path d="M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/><path d="M18 8v5M15.5 10.5h5"/></svg>
+          <button class="botaoIcone" id="btnAbrirLogin" type="button"
+            aria-label="Adicionar cliente" aria-expanded="false">
+            <svg viewBox="0 0 24 24">
+              <path d="M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
+              <path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/>
+              <path d="M18 8v5M15.5 10.5h5"/>
+            </svg>
+          </button>
           <h2>Clientes</h2>
         </div>
-        <button class="botaoIcone" type="button" aria-label="Buscar cliente">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
+
+        <div class="balaoLogin" id="balaoLogin" role="dialog" aria-label="Acesso do cliente">
+          <p class="balaoTitulo">Cadastro do Cliente</p>
+          <p class="balaoSubtitulo">Insira as credenciais para conectar</p>
+        <form action="POST" action="/cadastrar">
+          <div class="campoCadastro">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="cliente@email.com" autocomplete="email">
+          </div>
+
+          <div class="campoCadastro">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="Insira a Senha" autocomplete="current-password">
+          </div>
+
+          <p class="msgErro" id="msgErro" role="alert"></p>
+
+          <button class="botaoCadastrar" id="btnCadastrar" type="button">Cadastrar</button>
+        </form>
+        </div>
       </div>
 
       <ul class="scrollClientes" role="list">
@@ -190,5 +214,5 @@
   </main>
 
 </body>
-<script src="script.js"></script>
+<script src="/static/gerenciamento.js"></script>
 </html>

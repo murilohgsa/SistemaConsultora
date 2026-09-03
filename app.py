@@ -85,5 +85,33 @@ def logout():
     supabase.auth.sign_out()
     return redirect(url_for("login"))
 
+# cadastro do cliente
+
+@app.route("/cadastrar", methods=["POST"])
+def cadastrar():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    email = request.form.get("email", "").strip()
+    senha = request.form.get("senha", "")
+
+    if not email or not senha:
+        flash("Preencha email e senha.")
+        return redirect(url_for("gerenciamento"))
+
+    try:
+        supabase.auth.admin.create_user({
+            "email": email,
+            "password": senha,
+            "email_confirm": True
+        })
+        flash("Cliente cadstrado com sucesso!")
+    except Exception as e:
+        app.logger.exception("Erro ao cadastrar cliente")
+        flash("Erro ao cadastrar. Verifique os dados inseridos.")
+
+    return redirect(url_for("gerenciamento"))
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)

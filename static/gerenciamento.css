@@ -472,6 +472,114 @@
     background:rgba(17,17,17,0.8);
 }
 
+/* ---------- balão de login ---------- */
+
+.cabecalhoClientes { position: relative; }
+
+.balaoLogin {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  width: 248px;
+  background: var(--black);
+  border-radius: 18px;
+  padding: 22px 20px 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.balaoLogin.aberto { display: flex; }
+
+/* seta decorativa apontando pro botão */
+.balaoLogin::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 14px;
+  width: 14px;
+  height: 14px;
+  background: var(--black);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+.balaoTitulo {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 1.05rem;
+  color: #f7f4ef;
+  letter-spacing: 0.01em;
+}
+
+.balaoSubtitulo {
+  font-size: 0.75rem;
+  color: rgba(240,237,232,0.5);
+  margin-top: -6px;
+}
+
+.campoCadastro {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.campoCadastro label {
+  font-size: 0.72rem;
+  color: rgba(240,237,232,0.6);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.campoCadastro input {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  color: #f7f4ef;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+
+.campoCadastro input::placeholder { color: rgba(240,237,232,0.28); }
+.campoCadastro input:focus { border-color: var(--accent); }
+
+.msgErro {
+  font-size: 0.72rem;
+  color: #f87171;
+  min-height: 16px;
+  display: none;
+}
+
+.msgErro.visivel { display: block; }
+
+.botaoCadastrar {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: var(--black);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity .2s, transform .15s;
+  margin-top: 2px;
+}
+
+.botaoCadastrar:hover  { opacity: .85; }
+.botaoCadastrar:active { transform: scale(.98); }
+.botaoCadastrar:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
 /* ---------- responsividade ---------- */
 
 @media (max-width:1100px){
