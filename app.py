@@ -12,6 +12,9 @@ SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("Configure SUPABASE_URL e SUPABASE_KEY no arquivo .env")
 
+if not SUPABASE_SERVICE_KEY:
+    raise RuntimeError("Configure SUPABASE_SERVICE_KEY no arquivo .env")
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
@@ -45,7 +48,7 @@ def login():
             })
             usuario_id = resposta_auth.user.id
 
-            resposta_banco = (supabase.table("usuario")
+            resposta_banco = (supabase_admin.table("usuario")
                               .select("id_usuario, email, nome, is_consultora")
                               .eq("email", email)
                               .execute())
@@ -58,6 +61,7 @@ def login():
             is_consultora = dados_usuario.get("is_consultora", False)
 
             session["user_id"] = usuario_id
+            session["is_consultora"] = is_consultora
             if is_consultora:
                 return redirect(url_for("gerenciamento"))
             return redirect(url_for("feed"))
@@ -81,7 +85,8 @@ def gerenciamento():
     # Proteção: se não tiver logado, manda pro login de volta
     if "user_id" not in session:
         return redirect(url_for("login"))
-        
+    if not session.get("is_consultora"):
+        return redirect(url_for("feed"))
     return render_template("gerenciamento.html")
 
 @app.route("/feed")
@@ -118,7 +123,8 @@ def cadastrar():
         resposta = supabase_admin.auth.admin.create_user({
             "email": email,
             "password": senha,
-            "email_confirm": True
+            "email_confirm": True,
+            "user_metadata": {"nome": nome}
         })
 
         usuario_id = resposta.user.id
