@@ -7,11 +7,13 @@ from supabase import create_client, Client
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("Configure SUPABASE_URL e SUPABASE_KEY no arquivo .env")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 # --- 2. Configuração do Flask ---
 app = Flask(__name__)
@@ -34,6 +36,7 @@ def login():
             flash("Informe email e senha.")
             return render_template("login.html"), 400
 
+        
         try:
             # 1. Autentica no Supabase
             resposta_auth = supabase.auth.sign_in_with_password({
@@ -42,9 +45,21 @@ def login():
             })
             usuario_id = resposta_auth.user.id
 
-            # O perfil é opcional para autenticar. A tabela USUARIOS possui
-            # RLS e pode ser preenchida depois por uma operação administrativa.
+            resposta_banco = (supabase.table("usuario")
+                              .select("id_usuario, email, nome, is_consultora")
+                              .eq("email", email)
+                              .execute())
+
+            if not resposta_banco.data:
+                flash("Usuário não tem perfil configurado no banco.")
+                return render_template("login.html"), 403
+
+            dados_usuario = resposta_banco.data[0]
+            is_consultora = dados_usuario.get("is_consultora", False)
+
             session["user_id"] = usuario_id
+            if is_consultora:
+                return redirect(url_for("gerenciamento"))
             return redirect(url_for("feed"))
                 
         except Exception as e:
@@ -56,7 +71,6 @@ def login():
                 flash("Email ou senha incorretos.")
             return render_template("login.html"), 401
 
-    # Quando acessado via GET, mostra a página
     return render_template("login.html")
 
 
@@ -68,7 +82,7 @@ def gerenciamento():
     if "user_id" not in session:
         return redirect(url_for("login"))
         
-    return "<h1>Área de Consultoria / Gerenciamento </h1><a href='/logout'>Sair</a>"
+    return render_template("gerenciamento.html")
 
 @app.route("/feed")
 def feed():
@@ -91,19 +105,31 @@ def logout():
 def cadastrar():
     if "user_id" not in session:
         return redirect(url_for("login"))
+    nome = request.form.get("nome", "").strip()
     email = request.form.get("email", "").strip()
     senha = request.form.get("senha", "")
+    is_consultora = request.form.get("is_consultora") == "true"
 
-    if not email or not senha:
-        flash("Preencha email e senha.")
+    if not email or not senha or not nome:
+        flash("Preencha todos os campos.")
         return redirect(url_for("gerenciamento"))
 
     try:
-        supabase.auth.admin.create_user({
+        resposta = supabase_admin.auth.admin.create_user({
             "email": email,
             "password": senha,
             "email_confirm": True
         })
+
+        usuario_id = resposta.user.id
+
+        supabase_admin.table("usuario").insert({
+            "auth_user_id":usuario_id,
+            "email":email,
+            "nome": nome,
+            "is_consultora": is_consultora
+        }).execute()
+
         flash("Cliente cadstrado com sucesso!")
     except Exception as e:
         app.logger.exception("Erro ao cadastrar cliente")

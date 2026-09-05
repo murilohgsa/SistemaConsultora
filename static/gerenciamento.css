@@ -548,14 +548,44 @@
 .campoCadastro input::placeholder { color: rgba(240,237,232,0.28); }
 .campoCadastro input:focus { border-color: var(--accent); }
 
-.msgErro {
-  font-size: 0.72rem;
-  color: #f87171;
-  min-height: 16px;
-  display: none;
+.campoCheck {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
 }
 
-.msgErro.visivel { display: block; }
+.campoCheck input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex: none;
+}
+
+.campoCheck label {
+  font-size: 0.82rem;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.msgRetorno {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.msgRetorno.sucesso {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+
+.msgRetorno.erro {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
 
 .botaoCadastrar {
   width: 100%;

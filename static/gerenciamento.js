@@ -15,10 +15,21 @@ function abrirBalao(){
 }
 function fecharBalao(){
   balao.classList.remove('aberto');
-  btnAbrirLogin.setAttribute('aria-expanded', false)
+  btnAbrirLogin.setAttribute('aria-expanded', false);
+
+  const msgRetorno = balao.querySelector('.msgRetorno');
+  if (msgRetorno) msgRetorno.remove();
+
+  balao.querySelectorAll('input[type="email"], input[type=password], input[type="text"]')
+    .forEach(input => input.value = '');
 }
 function iniciarBalao(){
   // abrir/fechar
+
+  const temMensagem = balao.querySelector('.msgRetorno');
+  if(temMensagem){
+    abrirBalao();
+  }
   btnAbrirLogin.addEventListener('click', (e) =>{
     e.stopPropagation();
     balao.classList.contains('aberto') ? fecharBalao() : abrirBalao();

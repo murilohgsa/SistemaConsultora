@@ -53,25 +53,46 @@
           </button>
           <h2>Clientes</h2>
         </div>
-
+        <!--Cadastro clientes-->
         <div class="balaoLogin" id="balaoLogin" role="dialog" aria-label="Acesso do cliente">
           <p class="balaoTitulo">Cadastro do Cliente</p>
           <p class="balaoSubtitulo">Insira as credenciais para conectar</p>
-        <form action="POST" action="/cadastrar">
-          <div class="campoCadastro">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="cliente@email.com" autocomplete="email">
-          </div>
+          {% with mensagens = get_flashed_messages() %}
+            {% if mensagens %}
+              {% for msg in mensagens%}
+                <p class="msgRetorno {{ 'sucesso' if 'sucesso' in msg.lower() else 'erro' }}">
+                  {{ msg }}
+                </p>
+              {% endfor %}    
+          {% endif %}
+        {% endwith %}
 
-          <div class="campoCadastro">
-            <label for="senha">Senha</label>
-            <input type="password" id="senha" placeholder="Insira a Senha" autocomplete="current-password">
-          </div>
+          <form method="POST" action="/cadastrar">
 
-          <p class="msgErro" id="msgErro" role="alert"></p>
+            <div class="campoCadastro">
+              <label for="nome">Email</label>
+              <input type="text" id="nome" name="nome" placeholder="Nome do cliente" required>
+            </div>
 
-          <button class="botaoCadastrar" id="btnCadastrar" type="button">Cadastrar</button>
-        </form>
+            <div class="campoCadastro">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="cliente@email.com" autocomplete="email">
+            </div>
+
+            
+
+            <div class="campoCadastro">
+              <label for="senha">Senha</label>
+              <input type="password" id="senha" name="senha" placeholder="Insira a Senha" autocomplete="current-password">
+            </div>
+
+            <div class="campoCadastro campoCheck">
+              <input type="checkbox" id="is_consultora" name="is_consultora" value="true">
+              <label for="is_consultora">É consultora?</label>
+            </div>
+            
+            <button class="botaoCadastrar" id="btnCadastrar" type="submit">Cadastrar</button>
+          </form>
         </div>
       </div>
 
