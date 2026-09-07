@@ -85,9 +85,17 @@ def gerenciamento():
     # Proteção: se não tiver logado, manda pro login de volta
     if "user_id" not in session:
         return redirect(url_for("login"))
-    if not session.get("is_consultora"):
-        return redirect(url_for("feed"))
-    return render_template("gerenciamento.html")
+
+    try:
+        resposta = supabase_admin.table("usuario") \
+            .select("id_usuario, nome, email, foto_perfil") \
+            .eq("is_consultora", False) \
+            .execute()
+        clientes = resposta.data
+    except Exception:
+        clientes = []
+    return render_template("gerenciamento.html", clientes=clientes)
+
 
 @app.route("/feed")
 def feed():
@@ -143,7 +151,31 @@ def cadastrar():
 
     return redirect(url_for("gerenciamento"))
 
+@app.route("/excluir_cliente/<int:id_cliente>", methods=["POST"])
 
+def excluir_cliente(id_cliente):
+    if "user_id" not in session:
+        return redirect(url_for("login")), 401
+
+    try:
+        resposta = supabase_admin.table("usuario") \
+            .select("auth_user_id") \
+            .eq("id_usuario", id_cliente) \
+            .single() \
+            .execute()
+
+        auth_user_id = resposta.data["auth_user_id"]
+
+        supabase_admin.table("usuario") \
+            .delete() \
+            .eq("id_usuario", id_cliente) \
+            .execute()
+        supabase_admin.auth.admin.delete_user(auth_user_id)
+        return "", 200
+    
+    except Exception:
+        app.logger.exception("Erro ao excluir cliente")
+        return "", 500
 
 if __name__ == "__main__":
     app.run(debug=True)

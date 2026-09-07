@@ -280,6 +280,150 @@
     color:var(--black);
 }
 
+.linhaCliente {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.linhaCliente .itemCliente {
+  flex: 1;
+}
+
+.btnOpcoes {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0;
+  transition: opacity .2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.linhaCliente:hover .btnOpcoes {
+  opacity: 1;
+}
+
+.btnOpcoes svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.itemCliente[aria-current="true"] ~ .btnOpcoes {
+  color: var(--black);
+}
+
+.btnOpcoes:not(.itemCliente[aria-current="true"] ~ .btnOpcoes) {
+  color: #fff;
+}
+
+.menuOpcoes {
+  position: fixed;
+  background: var(--black);
+  border-radius: 12px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 200;
+  min-width: 120px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.menuOpcoes.aberto { display: flex; }
+
+.opcaoMenu {
+  background: transparent;
+  border: none;
+  color: #f7f4ef;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.opcaoMenu:hover { background: rgba(255,255,255,0.1); }
+
+.opcaoExcluir { color: #f87171; }
+.opcaoExcluir:hover { background: rgba(248,113,113,0.15); }
+
+/* modal de confirmação */
+.modalConfirmacao {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+.modalConfirmacao.aberto { display: flex; }
+
+.cartaoConfirmacao {
+  background: var(--black);
+  border-radius: 18px;
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 320px;
+  width: 90%;
+}
+
+.cartaoConfirmacao p {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  color: #f7f4ef;
+  line-height: 1.5;
+}
+
+.botoesConfirmacao {
+  display: flex;
+  gap: 10px;
+}
+
+.btnSim {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #f87171;
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+
+.btnSim:hover { opacity: .85; }
+
+.btnNao {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
+  color: #f7f4ef;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.btnNao:hover { background: rgba(255,255,255,0.08); }
+
 /* ---------- conteúdo do cliente ---------- */
 
 .conteudoCliente{

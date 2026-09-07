@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/static/login.css">
 <link rel="stylesheet" href="/static/gerenciamento.css">
 </head>
+
 <body>
 
   <!-- barra superior: identidade + controles da administradora -->
@@ -56,7 +57,7 @@
         <!--Cadastro clientes-->
         <div class="balaoLogin" id="balaoLogin" role="dialog" aria-label="Acesso do cliente">
           <p class="balaoTitulo">Cadastro do Cliente</p>
-          <p class="balaoSubtitulo">Insira as credenciais para conectar</p>
+          <p class="balaoSubtitulo">Insira as credenciais do cliente</p>
           {% with mensagens = get_flashed_messages() %}
             {% if mensagens %}
               {% for msg in mensagens%}
@@ -97,61 +98,35 @@
       </div>
 
       <ul class="scrollClientes" role="list">
-        <li>
-          <button class="itemCliente" type="button" aria-current="true">
-            <img src="https://i.pravatar.cc/72?img=12" alt="">
-            Cliente 1
+        {% for cliente in clientes %}
+        <li class="linhaCliente">
+          <button class="itemCliente" type="button" data-nome="{{ cliente.nome }}" data-foto="{{ cliente.foto_perfil or '/static/img/avatar_padrao.png'}}" {%if loop.first %}aria-current="true"{% endif %}>
+            <img src="{{ cliente.foto_perfil or '/static/img/avatar_padrao.png'}}" alt="">
+            {{ cliente.nome }}
           </button>
-        </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=32" alt="">
-            Cliente 2
+          <button class="btnOpcoes" type="button" aria-label="Opções">
+            <svg viewBox="0 0 24 24">
+              <circle cx="5" cy="12" r="1.5"/>
+              <circle cx="12" cy="12" r="1.5"/>
+              <circle cx="19" cy="12" r="1.5"/>
+            </svg>
           </button>
+
+          <div class="menuOpcoes">
+            <button class="opcaoMenu" type="button">Editar</button>
+            <button class="opcaoMenu opcaoExcluir" type="button" data-id="{{ cliente.id_usuario }}" data-nome="{{ cliente.nome }}">
+              Excluir
+            </button>
+          </div>
         </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=5" alt="">
-            Cliente 3
-          </button>
+        {% else %}
+        <li style="padding:12px; font-family:'Jost',sans-serif; opacity:0.5; font-size:0.88rem;">
+          Nenhum cliente cadastrado.
         </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=51" alt="">
-            Cliente 4
-          </button>
-        </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=47" alt="">
-            Cliente 5
-          </button>
-        </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=33" alt="">
-            Cliente 6
-          </button>
-        </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=14" alt="">
-            Cliente 7
-          </button>
-        </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=25" alt="">
-            Cliente 8
-          </button>
-        </li>
-        <li>
-          <button class="itemCliente" type="button">
-            <img src="https://i.pravatar.cc/72?img=44" alt="">
-            Cliente 9
-          </button>
-        </li>
+        {% endfor %}
       </ul>
+
+
     </aside>
 
     <!-- detalhe do cliente selecionado -->
@@ -233,6 +208,17 @@
     </section>
 
   </main>
+
+  <div class="modalConfirmacao" id="modalConfirmacao">
+  <div class="cartaoConfirmacao"> 
+    <p id="textoConfirmacao">Deseja realmente excluir esse cliente?</p>
+    <div class="botoesConfirmacao">
+      <button class="btnNao" id="btnNao" type="button">Não</button>
+      <button class="btnSim" id="btnSim" type="button">Sim</button>
+    </div>
+  </div>
+</div>
+
 
 </body>
 <script src="/static/gerenciamento.js"></script>
