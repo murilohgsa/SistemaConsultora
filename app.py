@@ -97,7 +97,7 @@ def gerenciamento():
     return render_template("gerenciamento.html", clientes=clientes)
 
 
-@app.route("/feed")
+@app.route("/feed") 
 def feed():
     # Proteção: se não tiver logado, manda pro login de volta
     if "user_id" not in session:
