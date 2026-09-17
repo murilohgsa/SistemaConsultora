@@ -27,7 +27,11 @@
         <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
         <span class="contadorNotificacao" aria-hidden="true">1</span>
       </button>
+      <a href="perfil.html" class="fotoPerfil" aria-label="Meu perfil">
+        <img src="{{cliente.foto_perfil or '/static/img/foto_perfil_padrao.png'}}" alt="{{ cliente.nome }}">
+      </a>
     </div>
+    
   </header>
 
   <main class="mainFeed">

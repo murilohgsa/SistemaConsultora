@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isabela Andrade — Guarda Roupa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/login.css">
+<link rel="stylesheet" href="/static/feed.css">
+</head>
+<body>
+
+  <!-- barra superior: identidade da cliente e ações rápidas -->
+  <header class="barraCliente">
+    <div class="nomeCliente">Isabela Andrade</div>
+    <div class="acoesCliente">
+      <button class="botaoIcone" type="button" aria-label="Buscar looks">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="botaoAdicionar" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>Adicionar Imagem</span>
+      </button>
+      <button class="botaoIcone botaoNotificacao" type="button" aria-label="Notificações, 1 nova">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
+        <span class="contadorNotificacao" aria-hidden="true">1</span>
+      </button>
+      <a href="/templates/perfil.html" class="fotoPerfil" aria-label="Meu perfil">
+        <img src="{{cliente.foto_perfil or '/static/img/foto_perfil_padrao.png'}}" alt="{{ cliente.nome }}">
+      </a>
+    </div>
+    
+  </header>
+
+
+  </main>
+
+</body>
+<script src="/static/script.js"></script>
+</html>

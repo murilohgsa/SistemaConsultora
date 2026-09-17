@@ -103,6 +103,12 @@ def feed():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
+    try:
+        perfil = supabase_admin.table("usuario").select("nome", "foto_perfil").eq("auth_user_id", session["user_id"]).single().execute()
+        cliente = perfil.data
+    except Exception:
+        cliente = {"nome": "", "foto_perfil": None}
+
     return render_template("feed.html")
 
 @app.route("/logout")
