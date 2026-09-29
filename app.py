@@ -102,14 +102,14 @@ def feed():
     # Proteção: se não tiver logado, manda pro login de volta
     if "user_id" not in session:
         return redirect(url_for("login"))
-
+    #pega a foto do cliente para o perfil ou pega uma aleatória
     try:
         perfil = supabase_admin.table("usuario").select("nome", "foto_perfil").eq("auth_user_id", session["user_id"]).single().execute()
         cliente = perfil.data
     except Exception:
-        cliente = {"nome": "", "foto_perfil": None}
+        cliente = {"nome": "", "foto_perfil.jpg": None}
 
-    return render_template("feed.html")
+    return render_template("feed.html", cliente=cliente)
 
 @app.route("/logout")
 def logout():
