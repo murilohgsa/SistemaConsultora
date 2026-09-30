@@ -182,6 +182,11 @@ def excluir_cliente(id_cliente):
     except Exception:
         app.logger.exception("Erro ao excluir cliente")
         return "", 500
+# Sair da sessão atual
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("/templates/login.hmtl"))
 
 if __name__ == "__main__":
     app.run(debug=True)

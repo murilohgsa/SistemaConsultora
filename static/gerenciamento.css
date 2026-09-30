@@ -170,6 +170,79 @@
     line-height:1;
 }
 
+/* ---------- confirmação de logout ---------- */
+
+.modalSair{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(17,17,17,0.55);
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+}
+
+.modalSair:target{
+    display:flex;
+}
+
+.cartaoSair{
+    background:#fff;
+    border-radius:18px;
+    padding:28px 30px;
+    max-width:320px;
+    width:90%;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(17,17,17,0.2);
+}
+
+.cartaoSair p{
+    font-family:'Jost', sans-serif;
+    font-size:1rem;
+    font-weight:500;
+    color:var(--black);
+    margin-bottom:22px;
+}
+
+.botoesSair{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+}
+
+.btnNaoSair,
+.btnSimSair{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 26px;
+    border-radius:30px;
+    font-family:'Jost', sans-serif;
+    font-size:0.88rem;
+    font-weight:600;
+    text-decoration:none;
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease;
+}
+
+.btnNaoSair{
+    background:#e9e5dc;
+    color:var(--black);
+}
+
+.btnNaoSair:hover{
+    background:#dcd7cb;
+}
+
+.btnSimSair{
+    background:#b6392f;
+    color:#fff;
+}
+
+.btnSimSair:hover{
+    background:#96271e;
+}
+
 /* foco visível geral */
 .botaoIcone:focus-visible,
 .itemCliente:focus-visible,

@@ -17,10 +17,6 @@
   <header class="barraTopo">
     <div class="marcaTopo">Isabela Andrade</div>
     <div class="controlesTopo">
-      <a class="linkFinanceiro" href="#">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 .9 3 2.2c0 3-6 1.6-6 4.5 0 1.3 1.3 2.3 3 2.3s3-1 3-2.3"/></svg>
-        Gerenciamento Financeiro
-      </a>
       <div class="controleVisao">
         <span class="rotuloVisao">Visão administrador</span>
         <label class="alternador">
@@ -35,6 +31,9 @@
         <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
         <span class="contadorNotificacao" aria-hidden="true">1</span>
       </button>
+      <a href="#modalSair" class="botaoIcone" aria-label="Sair da conta">
+        <svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h11"/></svg>
+      </a>
     </div>
   </header>
 
@@ -215,6 +214,16 @@
     <div class="botoesConfirmacao">
       <button class="btnNao" id="btnNao" type="button">Não</button>
       <button class="btnSim" id="btnSim" type="button">Sim</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalSair" id="modalSair">
+  <div class="cartaoSair">
+    <p>Deseja realmente sair?</p>
+    <div class="botoesSair">
+      <a href="#" class="btnNaoSair">Não</a>
+      <a href="{{ url_for('logout') }}" class="btnSimSair">Sim</a>
     </div>
   </div>
 </div>
