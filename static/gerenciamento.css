@@ -827,6 +827,292 @@
   cursor: not-allowed;
 }
 
+
+/*---aba peças---*/
+
+/* ---------- painel de peças ---------- */
+
+.painelPecas {
+  padding: 32px 36px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.grupoPecas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tituloCategoria {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--black);
+  letter-spacing: 0.02em;
+}
+
+.carrosselPecas {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+  position: relative;
+}
+
+.carrosselPecas::-webkit-scrollbar { display: none; }
+.carrosselPecas { scrollbar-width: none; }
+
+.cardPeca {
+  flex: none;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.cardPeca .imagemPeca {
+  width: 140px;
+  height: 180px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #e6e2da;
+  transition: transform .3s ease;
+}
+
+.cardPeca:hover .imagemPeca {
+  transform: scale(1.03);
+}
+
+.cardPeca .tituloPeca {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.setaCarrosselPecas {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--black);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.setaCarrosselPecas svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.setaCarrosselPecas:hover { background: #333; }
+
+.carregandoPecas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.semPecas {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  color: var(--muted);
+  padding: 48px;
+  text-align: center;
+}
+
+/* ---------- cabeçalho peças ---------- */
+
+.cabecalhoPecas {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 24px 36px 0;
+}
+
+.botaoAdicionarPeca {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--black);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+
+.botaoAdicionarPeca svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.botaoAdicionarPeca:hover { opacity: .85; }
+
+/* ---------- balão adicionar peça ---------- */
+
+.balaoAdicionarPeca {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 680px;
+  max-width: 90vw;
+  background: var(--black);
+  border-radius: 18px;
+  padding: 28px 32px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  z-index: 300;
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.balaoAdicionarPeca.aberto { display: flex; }
+
+.balaoAdicionarPeca::before {
+    display: none;
+}
+
+.balaoAdicionarPeca::-webkit-scrollbar { width: 4px; }
+.balaoAdicionarPeca::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+/* grupo de radio */
+.grupoRadio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.opcaoRadio {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.opcaoRadio input[type="radio"] {
+  display: none;
+}
+
+.opcaoRadio span {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.78rem;
+  color: rgba(240,237,232,0.7);
+  transition: background .2s, color .2s, border-color .2s;
+}
+
+.opcaoRadio input[type="radio"]:checked + span {
+  background: var(--accent);
+  color: var(--black);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.opcaoRadio span:hover {
+  border-color: rgba(255,255,255,0.5);
+  color: #fff;
+}
+
+/* select e textarea no balão */
+.balaoAdicionarPeca select,
+.balaoAdicionarPeca textarea {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  color: #f7f4ef;
+  outline: none;
+  width: 100%;
+  transition: border-color .2s;
+}
+
+.balaoAdicionarPeca select option {
+  background: var(--black);
+  color: #f7f4ef;
+}
+
+.balaoAdicionarPeca select:focus,
+.balaoAdicionarPeca textarea:focus {
+  border-color: var(--accent);
+}
+
+.balaoAdicionarPeca textarea {
+  resize: none;
+}
+
+/* input file */
+.balaoAdicionarPeca input[type="file"] {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  color: rgba(240,237,232,0.7);
+  width: 100%;
+  cursor: pointer;
+}
+
+.overlayAdicionarPeca {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 299;
+  display: none;
+}
+
+.overlayAdicionarPeca.aberto { display: block; }
+
+.balaoAdicionarPeca form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.balaoAdicionarPeca .campoCadastro.larguraTotal {
+  grid-column: 1 / -1;
+}
+
+.balaoAdicionarPeca button[type="submit"] {
+  grid-column: 1 / -1;
+}
+
 /* ---------- responsividade ---------- */
 
 @media (max-width:1100px){

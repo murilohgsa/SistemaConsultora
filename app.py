@@ -1,7 +1,9 @@
 import os
-from flask import Flask, request, redirect, url_for, render_template, flash, session
+from flask import Flask, request, redirect, url_for, render_template, flash, session, jsonify
 from dotenv import load_dotenv
 from supabase import create_client, Client
+import cloudinary
+import cloudinary.uploader
 
 # --- 1. Configuração do Supabase ---
 load_dotenv()
@@ -17,6 +19,14 @@ if not SUPABASE_SERVICE_KEY:
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+# Configuração do Cloudinary
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 # --- 2. Configuração do Flask ---
 app = Flask(__name__)
@@ -182,11 +192,90 @@ def excluir_cliente(id_cliente):
     except Exception:
         app.logger.exception("Erro ao excluir cliente")
         return "", 500
-# Sair da sessão atual
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("/templates/login.hmtl"))
+
+
+@app.route("/pecas/<int:id_cliente>")
+def pecas(id_cliente):
+    if "user_id" not in session:
+        return jsonify([]), 401
+
+    try:
+        resposta = supabase_admin.table("pecas").select("id_peca, titulo, imagem, estacao, ocasiao, is_favorito, categoria(nome)").eq("id_cliente", id_cliente).execute()
+
+        #formata os dados
+        resultado = []
+        for peca in resposta.data:
+            resultado.append({
+                "id_peca": peca["id_peca"],
+                "titulo": peca["titulo"],
+                "imagem": peca["imagem"],
+                "estacao": peca["estacao"],
+                "ocasiao": peca["ocasiao"],
+                "is_favorito": peca["is_favorito"],
+                "categoria_nome": peca.get("categoria", {}).get("nome") if peca.get("categoria") else "Sem categoria"
+            })
+        return jsonify(resultado), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar pecas")
+        return jsonify([]), 500
+
+@app.route("/categorias")
+def categorias():
+    if "user_id" not in session:
+        return jsonify([]), 401
+
+    try:
+        resposta = supabase_admin.table("categoria").select("id_categoria, nome").execute()
+        return jsonify(resposta.data), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar categorias")
+        return jsonify([]), 500
+
+@app.route("/adicionar_peca", methods=["POST"])
+def adicionar_peca():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    id_cliente = request.form.get("id_cliente")
+    titulo = request.form.get("titulo", "").strip()
+    id_categoria = request.form.get("id_categoria")
+    estacao = request.form.get("ocasiao")
+    observacoes = request.form.get("observacoes", "").strip()
+    imagem = request.files.get("imagem")
+
+    if not all([id_cliente, titulo, id_categoria, estacao, ocasiao, imagem]):
+        flash("Preencha todos os campos.", "erro")
+        return redirect(url_for("gerenciamento"))
+    
+    #fazer upload para o cloudinary
+    try:
+        resultado = cloudinary.uploader.upload(
+            imagem, 
+            folder="pecas",
+            transformation=[{"width": 600, "crop": "limit"}]
+        )
+        url_imagem = resultado["secure_url"]
+
+        #salva no banco
+
+        supabase_admin.table("pecas").insert({
+            "id_cliente": int(id_cliente),
+            "titulo": titulo,
+            "id_categoria": int(id_categoria),
+            "estacao": estacao,
+            "ocasiao": ocasiao,
+            "observacoes": observacoes,
+            "imagem": url_imagem,
+            "is_favorito": False
+        }).execute()
+
+        flash("Peça adicionada com sucesso!", "sucesso")
+    except Exception:
+        app.logger.exception("Erro ao adicionar peça")
+        flash("Erro ao adicionar peça", "erro")
+    return redirect(url_for("gerenciamento"))
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
