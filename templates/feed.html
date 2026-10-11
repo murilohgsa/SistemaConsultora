@@ -20,7 +20,7 @@
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
       <button class="botaoAdicionar" type="button">
-        <a href="/templates/adicionarPeca.html">
+        <a href="/adicionarPeca">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           <span>Adicionar Imagem</span>
         </a>
@@ -29,8 +29,8 @@
         <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
         <span class="contadorNotificacao" aria-hidden="true">1</span>
       </button>
-      <a href="perfil.html" class="fotoPerfil" aria-label="Meu perfil">
-        <img src="{{cliente.foto_perfil or '/static/img/foto_perfil.jpg'}}" alt="{{ cliente.nome }}">
+      <a href="{{ url_for('perfil') }}" class="fotoPerfil" aria-label="Meu perfil">
+        <img src="{{ cliente.foto_perfil or url_for('static', filename='img/foto_perfil.jpg') }}" alt="Foto de perfil">        
       </a>
     </div>
     

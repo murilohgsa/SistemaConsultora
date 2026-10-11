@@ -589,9 +589,9 @@
     font-weight:600;
 }
 
-.tomLaranja{ background:#f2ca8c; color:#4a3213; }
-.tomAzul{ background:#5480f2; color:#fff; }
-.tomRosa{ background:#ef4fa0; color:#fff; }
+.tomLaranja{ background:#AF8F72; color:#000; }
+.tomAzul{ background:#AF8F72; color:#000; }
+.tomRosa{ background:#AF8F72; color:#000; }
 
 .espacoGrafico{
     flex:1;
@@ -1113,6 +1113,167 @@
   grid-column: 1 / -1;
 }
 
+.wrapperCarrossel {
+  position: relative;
+}
+
+.imagemPecaWrapper {
+  position: relative;
+  width: 140px;
+  height: 180px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.imagemPecaWrapper .imagemPeca {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.btnExcluirPeca {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(17,17,17,0.65);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s, opacity .2s;
+  z-index: 2;
+  opacity: 0;  /* esconde por padrão */
+}
+
+.imagemPecaWrapper:hover .btnExcluirPeca {
+  opacity: 1;  /* aparece no hover */
+}
+
+.btnExcluirPeca svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.btnExcluirPeca:hover {
+  background: #f87171;
+}
+
+.setaCarrosselPecas {
+  position: absolute;
+  top: 90px;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--black);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s, visibility .2s;
+  visibility: hidden;
+}
+
+.setaCarrosselPecas svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.setaCarrosselPecas:hover { background: #333; }
+
+.setaEsquerda { left: -12px; }
+.setaDireitra { right: -12px;}
+
+.wrapperCarrossel .setaEsquerda {
+  left: 8px;
+  right: auto;
+}
+
+.wrapperCarrossel .setaDireita {
+  right: 8px;
+  left: auto;
+}
+
+.modalConfirmacaoPeca {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,17,17,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+.modalConfirmacaoPeca.aberto { display: flex; }
+
+.modalConfirmacaoPeca .cartaoConfirmacao {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 30px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(17,17,17,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modalConfirmacaoPeca .cartaoConfirmacao p {
+  font-family: 'Jost', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--black);
+}
+
+.modalConfirmacaoPeca .botoesConfirmacao {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.modalConfirmacaoPeca .btnNao {
+  background: #e9e5dc;
+  color: var(--black);
+  border: none;
+  border-radius: 30px;
+  padding: 10px 26px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.modalConfirmacaoPeca .btnNao:hover { background: #dcd7cb; }
+
+.modalConfirmacaoPeca .btnSim {
+  background: #b6392f;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 26px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.modalConfirmacaoPeca .btnSim:hover { background: #96271e; }
 /* ---------- responsividade ---------- */
 
 @media (max-width:1100px){

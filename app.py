@@ -128,6 +128,19 @@ def logout():
     supabase.auth.sign_out()
     return redirect(url_for("login"))
 
+@app.route("/perfil")
+def perfil():
+    # Proteção: se não tiver logado, manda pro login de volta
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    try:
+        resposta = supabase_admin.table("usuario").select("*").eq("auth_user_id", session["user_id"]).single().execute()
+        cliente = resposta.data
+    except Exception:
+        cliente= None
+    return render_template("perfil.html", cliente=cliente)
+
+
 # cadastro do cliente
 
 @app.route("/cadastrar", methods=["POST"])
@@ -160,10 +173,10 @@ def cadastrar():
             "is_consultora": is_consultora
         }).execute()
 
-        flash("Cliente cadstrado com sucesso!")
+        flash("Cliente cadastrado com sucesso!", "cadastro")
     except Exception as e:
         app.logger.exception("Erro ao cadastrar cliente")
-        flash("Erro ao cadastrar. Verifique os dados inseridos.")
+        flash("Erro ao cadastrar. Verifique os dados inseridos.", "cadastro_erro")
 
     return redirect(url_for("gerenciamento"))
 
@@ -239,7 +252,8 @@ def adicionar_peca():
     id_cliente = request.form.get("id_cliente")
     titulo = request.form.get("titulo", "").strip()
     id_categoria = request.form.get("id_categoria")
-    estacao = request.form.get("ocasiao")
+    estacao = request.form.get("estacao")
+    ocasiao = request.form.get("ocasiao")
     observacoes = request.form.get("observacoes", "").strip()
     imagem = request.files.get("imagem")
 
@@ -274,6 +288,38 @@ def adicionar_peca():
         app.logger.exception("Erro ao adicionar peça")
         flash("Erro ao adicionar peça", "erro")
     return redirect(url_for("gerenciamento"))
+
+@app.route("/excluir_peca/<int:id_peca>", methods=["POST"])
+def excluir_peca(id_peca):
+    if "user_id" not in session:
+        return "", 401
+
+    try:
+        # busca a URL da imagem para deletar do Cloudinary
+        resposta = supabase_admin.table("pecas") \
+            .select("imagem") \
+            .eq("id_peca", id_peca) \
+            .single() \
+            .execute()
+
+        url_imagem = resposta.data.get("imagem")
+
+        # exclui do banco
+        supabase_admin.table("pecas") \
+            .delete() \
+            .eq("id_peca", id_peca) \
+            .execute()
+
+        # exclui do Cloudinary
+        if url_imagem:
+            public_id = "pecas/" + url_imagem.split("/")[-1].split(".")[0]
+            cloudinary.uploader.destroy(public_id)
+
+        return "", 200
+
+    except Exception:
+        app.logger.exception("Erro ao excluir peça")
+        return "", 500
 
 
 

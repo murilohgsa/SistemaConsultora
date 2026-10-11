@@ -57,15 +57,17 @@
         <div class="balaoLogin" id="balaoLogin" role="dialog" aria-label="Acesso do cliente">
           <p class="balaoTitulo">Cadastro do Cliente</p>
           <p class="balaoSubtitulo">Insira as credenciais do cliente</p>
-          {% with mensagens = get_flashed_messages() %}
+          {% with mensagens = get_flashed_messages(with_categories=true) %}
             {% if mensagens %}
-              {% for msg in mensagens%}
-                <p class="msgRetorno {{ 'sucesso' if 'sucesso' in msg.lower() else 'erro' }}">
-                  {{ msg }}
-                </p>
-              {% endfor %}    
-          {% endif %}
-        {% endwith %}
+              {% for categoria, msg in mensagens %}
+                {% if categoria in ['cadastro', 'cadastro_erro'] %}
+                  <p class="msgRetorno {{ 'sucesso' if categoria == 'cadastro' else 'erro' }}">
+                    {{ msg }}
+                  </p>
+                {% endif %}    
+              {% endfor %}  
+            {% endif %}
+          {% endwith %}
 
           <form method="POST" action="/cadastrar">
 
@@ -100,7 +102,7 @@
         {% for cliente in clientes %}
         <li class="linhaCliente">
           <button class="itemCliente" type="button" data-id="{{ cliente.id_usuario }}" data-nome="{{ cliente.nome }}" data-foto="{{ cliente.foto_perfil or '/static/img/avatar_padrao.png'}}" {%if loop.first %}aria-current="true"{% endif %}>
-            <img src="{{ cliente.foto_perfil or '/static/img/avatar_padrao.png'}}" alt="">
+            <img src="{{ cliente.foto_perfil or 'foto_perfil.jpg' }}" alt="Foto de perfil de {{ cliente.nome }}">
             {{ cliente.nome }}
           </button>
           <button class="btnOpcoes" type="button" aria-label="Opções">
@@ -218,6 +220,16 @@
           <div class="balaoAdicionarPeca" id="balaoAdicionarPeca" role="dialog" aria-label="Adicionar peça">
             <p class="balaoTitulo">Nova Peça</p>
             <p class="balaoSubtitulo">Preencha os dados da peça</p>
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+              {% if mensagens %}
+                {% for categoria, msg in mensagens %}
+                  {% if categoria in ['sucesso', 'erro'] %}
+                    <p class="msgRetorno {{ categoria }}">{{ msg }}</p>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
             <form method="POST" action="/adicionar_peca" enctype="multipart/form-data" id="formAdicionarPeca">
               <input type="hidden" name="id_cliente" id="inputIdCliente">
               
@@ -248,7 +260,7 @@
                 </div>
               </div>
 
-              <div class="campoCadastro" larguraTotal>
+              <div class="campoCadastro larguraTotal">
                 <label>Ocasião</label>
                 <div class="grupoRadio">
                   <label class="opcaoRadio"><input type="radio" name="ocasiao" value="Trabalho" required><span>Trabalho</span></label>
@@ -259,7 +271,7 @@
                 </div>
               </div>
 
-              <div class="campoCadastro" larguraTotal>
+              <div class="campoCadastro larguraTotal">
                 <label for="observacoes">Observações</label>
                 <textarea id="observacoes" name="observacoes" placeholder="Observações sobre a peça..." rows="3"></textarea>
               </div>
@@ -273,7 +285,6 @@
               <span>Carregando peças...</span>
             </div>
           </div>
-        </div>
       
       <div class="painelAba" id="painel-relatorio" role="tabpanel" style="display:none">
         <div class="avisoGrafico" style="padding:48px">
@@ -296,7 +307,17 @@
 
   </main>
 
-  <div class="modalConfirmacao" id="modalConfirmacao">
+<div class="modalConfirmacaoPeca" id="modalConfirmacaoPeca">
+  <div class="cartaoConfirmacao">
+    <p id="textoConfirmacaoPeca">Deseja realmente excluir esta peça?</p>
+    <div class="botoesConfirmacao">
+      <button class="btnNao" id="btnNaoPeca" type="button">Não</button>
+      <button class="btnSim" id="btnSimPeca" type="button">Sim</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalConfirmacao" id="modalConfirmacao">
   <div class="cartaoConfirmacao"> 
     <p id="textoConfirmacao">Deseja realmente excluir esse cliente?</p>
     <div class="botoesConfirmacao">
