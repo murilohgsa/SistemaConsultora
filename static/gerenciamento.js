@@ -303,7 +303,7 @@ function iniciarBalaoAdicionarPeca() {
     e.stopPropagation();
     const clienteAtivo = document.querySelector('.itemCliente[aria-current="true"]');
     if (clienteAtivo) {
-      document.getElementById('inputIdCliente').value = clienteAtivo.dataset.id;
+      window.location.href = `/adicionar_peca_cliente?id_cliente=${clienteAtivo.dataset.id}`;
     }
     balao.classList.contains('aberto') ? fecharBalaoAdicionarPeca() : abrirBalaoAdicionarPeca();
   });

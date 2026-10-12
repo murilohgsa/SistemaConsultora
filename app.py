@@ -249,6 +249,8 @@ def adicionar_peca():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
+    destino = "gerenciamento" if session.get("is_consultora") else "feed"
+
     id_cliente = request.form.get("id_cliente")
     titulo = request.form.get("titulo", "").strip()
     id_categoria = request.form.get("id_categoria")
@@ -321,6 +323,24 @@ def excluir_peca(id_peca):
         app.logger.exception("Erro ao excluir peça")
         return "", 500
 
+# cadastro de pecas do cliente
+
+@app.route("/adicionarPecaCliente")
+def adicionarPecaCliente():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    try:
+        resp_categorias = supabase_admin.table("categoria").select("id_categoria, nome").execute()
+        categorias = resp_categorias.data
+        resp_usuario=supabase_admin.table("usuario").select("id_usuario").eq("auth_user_id", session["user_id"]).single().execute()
+        id_cliente = resp_usuario.data["id_usuario"]
+    except Exception:
+        app.logger.exception("Erro ao carregar página de adicionar peça")
+        categorias = []
+        id_cliente = None
+
+    return render_template("adicionarPeca.html", categorias=categorias, id_cliente=id_cliente)
 
 
 if __name__ == "__main__":
