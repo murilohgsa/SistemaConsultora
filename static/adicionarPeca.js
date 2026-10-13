@@ -10,13 +10,15 @@ function iniciarSelecaoImagem() {
 
   inputImagem.addEventListener('change', () => {
     if (inputImagem.files.length > 0) {
-      textoImagem.textContent = inputImagem.files[0].name;
+      const arquivo = inputImagem.files[0];
+      textoImagem.textContent = arquivo.name;
       botaoImagem.classList.add('selecionada');
 
       const reader = new FileReader();
       reader.onload = (e) => {
         iconeImagem.innerHTML=`<img src="${e.target.result}"style="width:46px;height:46px;object-fit:cover;border-radius:6px;" alt="preview">`;
       };
+      
       reader.readAsDataURL(arquivo);
     } else {
       textoImagem.textContent = 'Escolher imagem';

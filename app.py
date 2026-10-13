@@ -248,8 +248,8 @@ def categorias():
 def adicionar_peca():
     if "user_id" not in session:
         return redirect(url_for("login"))
-
-    destino = "gerenciamento" if session.get("is_consultora") else "feed"
+    is_consultora = session.get("is_consultora", False)
+    destino = "gerenciamento" if is_consultora else "adicionarPecaCliente"
 
     id_cliente = request.form.get("id_cliente")
     titulo = request.form.get("titulo", "").strip()
@@ -261,7 +261,7 @@ def adicionar_peca():
 
     if not all([id_cliente, titulo, id_categoria, estacao, ocasiao, imagem]):
         flash("Preencha todos os campos.", "erro")
-        return redirect(url_for("gerenciamento"))
+        return redirect(url_for(destino))
     
     #fazer upload para o cloudinary
     try:
@@ -289,7 +289,7 @@ def adicionar_peca():
     except Exception:
         app.logger.exception("Erro ao adicionar peça")
         flash("Erro ao adicionar peça", "erro")
-    return redirect(url_for("gerenciamento"))
+    return redirect(url_for(destino))
 
 @app.route("/excluir_peca/<int:id_peca>", methods=["POST"])
 def excluir_peca(id_peca):
@@ -325,7 +325,7 @@ def excluir_peca(id_peca):
 
 # cadastro de pecas do cliente
 
-@app.route("/adicionarPecaCliente")
+@app.route("/adicionar")
 def adicionarPecaCliente():
     if "user_id" not in session:
         return redirect(url_for("login"))
