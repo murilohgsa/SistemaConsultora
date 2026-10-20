@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/static/login.css">
 <link rel="stylesheet" href="/static/feed.css">
 <link rel="stylesheet" href="/static/perfil.css">
+<link rel="stylesheet" href="/static/notificacoes.css">
 </head>
 <body>
 
@@ -20,10 +21,18 @@
       <button class="botaoIcone" type="button" aria-label="Buscar looks">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
-      <button class="botaoIcone botaoNotificacao" type="button" aria-label="Notificações, 1 nova">
-        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
-        <span class="contadorNotificacao" aria-hidden="true">1</span>
-      </button>
+      <!-- sininho: o número e a lista vêm de /notificacoes (static/notificacoes.js) -->
+      <div class="areaNotificacoes">
+        <button class="botaoIcone botaoNotificacao" id="btnNotificacoes" type="button"
+                aria-label="Notificações" aria-expanded="false" aria-controls="painelNotificacoes">
+          <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
+          <span class="contadorNotificacao" id="contadorNotificacoes" aria-hidden="true" hidden></span>
+        </button>
+        <div class="painelNotificacoes" id="painelNotificacoes" role="dialog" aria-label="Notificações">
+          <p class="tituloNotificacoes">Notificações</p>
+          <ul class="listaNotificacoes" id="listaNotificacoes"></ul>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -138,6 +147,10 @@
     </div>
   </main>
 
+  <!-- aviso que aparece no canto quando a consultora cria um look novo -->
+  <div class="avisoNovoLook" id="avisoNovoLook" role="status" hidden></div>
+
 </body>
 <script src="/static/script.js"></script>
+<script src="/static/notificacoes.js"></script>
 </html>

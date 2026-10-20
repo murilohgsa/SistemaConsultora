@@ -1744,6 +1744,13 @@
   transition: transform .2s;
 }
 
+/* com várias peças na mesma parte, as fotos encolhem para caber na largura
+   do boneco (sem isso, duas peças de tronco passavam por cima dos acessórios) */
+.faixaBoneco img {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 /* peças da mesma parte ficam levemente sobrepostas */
 .faixaBoneco img + img { margin-left: -14px; }
 

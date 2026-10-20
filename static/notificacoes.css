@@ -1,0 +1,208 @@
+/* =====================================================================
+   NOTIFICAÇÕES DO CLIENTE (sininho) — usado no feed, perfil e adicionar peça
+   ===================================================================== */
+
+/* envolve o sininho para o painel abrir logo abaixo dele */
+.areaNotificacoes {
+  position: relative;
+  display: inline-flex;
+}
+
+.areaNotificacoes .botaoNotificacao,
+.areaNotificacoes .botaoNotificacaoCliente {
+  position: relative;
+}
+
+/* número de não lidas (mesmo visual do feed.css, repetido aqui para a
+   tela de adicionar peça, que não carrega o feed.css) */
+.areaNotificacoes .contadorNotificacao {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--black);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* o display:flex acima ganharia do atributo hidden; isso garante que esconde */
+.areaNotificacoes .contadorNotificacao[hidden] { display: none; }
+
+/* ---------- painel que abre ao clicar no sininho ---------- */
+.painelNotificacoes {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: -12px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  color: var(--black);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(17,17,17,0.18);
+  padding: 16px 0 8px;
+  z-index: 500;
+  display: none;
+  text-align: left;
+}
+
+.painelNotificacoes.aberto { display: block; }
+
+.tituloNotificacoes {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 1.05rem;
+  padding: 0 18px 10px;
+  border-bottom: 1px solid #ece8e1;
+}
+
+.listaNotificacoes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.semNotificacoes {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 24px 18px;
+  text-align: center;
+}
+
+.itemNotificacao {
+  display: flex;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1ede6;
+}
+
+.itemNotificacao:last-child { border-bottom: none; }
+
+/* não lida: fundo de papel + bolinha na lateral */
+.itemNotificacao.naoLida {
+  background: var(--paper);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* mini "look" com as fotos das peças empilhadas em grade 2x2 */
+.fotosNotificacao {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f1ede6;
+  position: relative;
+}
+
+.fotosNotificacao img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* uma peça só ocupa o quadrado todo */
+.fotosNotificacao img:only-child { grid-column: 1 / -1; grid-row: 1 / 3; }
+
+.maisFotos {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  background: rgba(17,17,17,0.75);
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.62rem;
+  padding: 1px 5px;
+  border-radius: 8px;
+}
+
+.textoNotificacao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.textoNotificacao p {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.tagsNotificacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tagsNotificacao span {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #f1ede6;
+}
+
+.textoNotificacao time {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ---------- aviso no canto quando chega look novo ---------- */
+.avisoNovoLook {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 320px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--black);
+  color: #f7f4ef;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  box-shadow: 0 12px 32px rgba(17,17,17,0.25);
+  border-left: 4px solid var(--accent);
+  cursor: pointer;
+  animation: entrarAviso .35s ease;
+}
+
+.avisoNovoLook[hidden] { display: none; }
+
+.avisoNovoLook strong {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+@keyframes entrarAviso {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+  .painelNotificacoes { position: fixed; top: 72px; right: 16px; left: 16px; width: auto; max-width: none; }
+  .avisoNovoLook { right: 16px; left: 16px; bottom: 16px; max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avisoNovoLook { animation: none; }
+}

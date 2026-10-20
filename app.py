@@ -439,6 +439,17 @@ def salvar_look():
             supabase_admin.table("looks").delete().eq("id_look", id_look).execute()
             raise
 
+        # 4. avisa o cliente que tem look novo (aparece no sininho das telas dele).
+        # Fica num try separado: se a notificação falhar, o look continua salvo.
+        try:
+            supabase_admin.table("notificacao").insert({
+                "id_usuario": int(id_cliente),
+                "id_look": id_look,
+                "mensagem": f'Sua consultora criou um novo look para você: "{titulo}"'
+            }).execute()
+        except Exception:
+            app.logger.exception("Erro ao criar notificação do look")
+
         return jsonify({"id_look": id_look}), 201
     except Exception:
         app.logger.exception("Erro ao salvar look")
@@ -456,6 +467,73 @@ def excluir_look(id_look):
         return "", 200
     except Exception:
         app.logger.exception("Erro ao excluir look")
+        return "", 500
+
+
+# --- 7. Notificações do cliente ---
+
+def id_usuario_logado():
+    # A sessão guarda o id do Supabase Auth (uuid). As tabelas usam o id_usuario
+    # (número) da tabela usuario, então aqui fazemos a conversão.
+    resposta = supabase_admin.table("usuario").select("id_usuario") \
+        .eq("auth_user_id", session["user_id"]).single().execute()
+    return resposta.data["id_usuario"]
+
+@app.route("/notificacoes")
+def notificacoes():
+    # Lista as últimas 20 notificações do usuário logado, já com o look
+    # (título, imagens das peças e categorias) para o JavaScript mostrar no sininho.
+    # Devolve: {"nao_lidas": 2, "notificacoes": [...]}
+    if "user_id" not in session:
+        return jsonify({"nao_lidas": 0, "notificacoes": []}), 401
+
+    try:
+        resposta = supabase_admin.table("notificacao").select(
+            "id_notificacao, mensagem, lida, data, "
+            "looks(id_look, titulo, "
+            "look_pecas(pecas(imagem, titulo, categoria(parte_corpo))), "
+            "look_categoria(categoria_look(nome)))"
+        ).eq("id_usuario", id_usuario_logado()).order("data", desc=True).limit(20).execute()
+
+        resultado = []
+        for notif in resposta.data:
+            look = notif.get("looks") or {}
+            # peças do look, na ordem do corpo (cabeça primeiro, acessórios por último)
+            pecas = [ligacao["pecas"] for ligacao in look.get("look_pecas") or [] if ligacao.get("pecas")]
+            pecas.sort(key=lambda p: (p.get("categoria") or {}).get("parte_corpo") or 9)
+            resultado.append({
+                "id_notificacao": notif["id_notificacao"],
+                "mensagem": notif["mensagem"],
+                "lida": notif["lida"],
+                "data": notif["data"],
+                "titulo_look": look.get("titulo"),
+                "imagens": [p["imagem"] for p in pecas if p.get("imagem")],
+                "categorias": [
+                    ligacao["categoria_look"]["nome"]
+                    for ligacao in look.get("look_categoria") or []
+                    if ligacao.get("categoria_look")
+                ]
+            })
+
+        nao_lidas = sum(1 for n in resultado if not n["lida"])
+        return jsonify({"nao_lidas": nao_lidas, "notificacoes": resultado}), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar notificações")
+        return jsonify({"nao_lidas": 0, "notificacoes": []}), 500
+
+@app.route("/notificacoes/lidas", methods=["POST"])
+def marcar_notificacoes_lidas():
+    # Chamada quando o cliente abre o sininho: marca todas como lidas,
+    # o que zera o número vermelho.
+    if "user_id" not in session:
+        return "", 401
+
+    try:
+        supabase_admin.table("notificacao").update({"lida": True}) \
+            .eq("id_usuario", id_usuario_logado()).eq("lida", False).execute()
+        return "", 200
+    except Exception:
+        app.logger.exception("Erro ao marcar notificações como lidas")
         return "", 500
 
 @app.route("/adicionar_peca", methods=["POST"])
