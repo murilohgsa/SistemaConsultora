@@ -211,11 +211,52 @@
       <div class="painelAba" id="painel-pecas" role="tabpanel" style="display:none">
 
         <div class="cabecalhoPecas">
+          <!-- abre o balão de categorias de peça (cadastrar e ver por parte do corpo) -->
+          <button class="botaoAdicionarPeca botaoSecundario" id="btnCategorias" type="button">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg>
+            Categorias
+          </button>
           <button class="botaoAdicionarPeca" id="btnAdicionarPeca" type="button">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             Adicionar Peça
           </button>
         </div>
+
+          <!--
+            Balão de CATEGORIAS DE PEÇA
+            Cada categoria (Calça, Sapato, Boné...) pertence a uma parte do corpo.
+            É isso que faz a peça aparecer na bolinha certa da silhueta na aba "Adicionar Looks".
+            Os números (1 a 5) são os mesmos da tabela parte_corpo do banco.
+          -->
+          <div class="balaoAdicionarPeca balaoCategorias" id="balaoCategorias" role="dialog" aria-label="Categorias de peça">
+            <p class="balaoTitulo">Categorias de Peça</p>
+            <p class="balaoSubtitulo">Cada categoria fica ligada a uma parte do corpo</p>
+
+            <form id="formCategoria">
+              <div class="campoCadastro larguraTotal">
+                <label for="nomeCategoria">Nome</label>
+                <input type="text" id="nomeCategoria" name="nome" placeholder="Ex: Brinco" required>
+              </div>
+
+              <div class="campoCadastro larguraTotal">
+                <label>Parte do corpo</label>
+                <div class="grupoRadio">
+                  <label class="opcaoRadio"><input type="radio" name="parte_corpo" value="1" required><span>Cabeça</span></label>
+                  <label class="opcaoRadio"><input type="radio" name="parte_corpo" value="2"><span>Tronco</span></label>
+                  <label class="opcaoRadio"><input type="radio" name="parte_corpo" value="3"><span>Cintura</span></label>
+                  <label class="opcaoRadio"><input type="radio" name="parte_corpo" value="4"><span>Pés</span></label>
+                  <label class="opcaoRadio"><input type="radio" name="parte_corpo" value="5"><span>Acessório</span></label>
+                </div>
+              </div>
+
+              <!-- mensagem de sucesso/erro preenchida pelo JavaScript -->
+              <p class="msgRetorno" id="msgCategoria" hidden></p>
+              <button class="botaoCadastrar" type="submit">Cadastrar categoria</button>
+            </form>
+
+            <!-- lista das categorias existentes, agrupadas por parte do corpo (montada no JS) -->
+            <div class="listaCategorias" id="listaCategorias"></div>
+          </div>
 
           <div class="balaoAdicionarPeca" id="balaoAdicionarPeca" role="dialog" aria-label="Adicionar peça">
             <p class="balaoTitulo">Nova Peça</p>
@@ -339,53 +380,96 @@
                 <ellipse cx="138" cy="378" rx="18" ry="10" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
               </svg>
 
-              <!-- pontos clicáveis -->
-              <button class="pontoCampo" data-regiao="cabeca" style="top:6%; left:50%;" aria-label="Cabeça">
+              <!--
+                Pontos clicáveis da silhueta.
+                data-parte = número da parte do corpo (igual à tabela parte_corpo do banco):
+                  1 cabeça | 2 tronco | 3 cintura | 4 pés | 5 acessório
+                Ao clicar, o JS abre o modal só com as peças do cliente daquela parte.
+                O .contadorPonto mostra quantas peças já foram escolhidas naquela parte.
+              -->
+              <button class="pontoCampo" data-parte="1" style="top:6%; left:50%;" aria-label="Cabeça">
                 <span class="tooltipPonto">Cabeça</span>
+                <span class="contadorPonto" hidden></span>
               </button>
 
-              <button class="pontoCampo" data-regiao="tronco" style="top:26%; left:50%;" aria-label="Tronco">
+              <button class="pontoCampo" data-parte="2" style="top:26%; left:50%;" aria-label="Tronco">
                 <span class="tooltipPonto">Tronco</span>
+                <span class="contadorPonto" hidden></span>
               </button>
 
-              <button class="pontoCampo" data-regiao="cintura" style="top:46%; left:50%;" aria-label="Cintura">
+              <button class="pontoCampo" data-parte="3" style="top:46%; left:50%;" aria-label="Cintura">
                 <span class="tooltipPonto">Cintura</span>
+                <span class="contadorPonto" hidden></span>
               </button>
 
-              <button class="pontoCampo" data-regiao="pes" style="top:78%; left:50%;" aria-label="Pés">
+              <button class="pontoCampo" data-parte="4" style="top:78%; left:50%;" aria-label="Pés">
                 <span class="tooltipPonto">Pés</span>
+                <span class="contadorPonto" hidden></span>
               </button>
 
-              <button class="pontoCampo" data-regiao="acessorio" style="top:36%; left:20%;" aria-label="Acessório">
+              <button class="pontoCampo" data-parte="5" style="top:36%; left:20%;" aria-label="Acessório">
                 <span class="tooltipPonto">Acessório</span>
+                <span class="contadorPonto" hidden></span>
               </button>
             </div>
 
-            <!-- botão salvar look -->
-            <button class="botaoSalvarLook" id="btnSalvarLook" type="button">
+            <!-- botão salvar look: abre o modal para dar nome e categorias ao look -->
+            <button class="botaoSalvarLook" id="btnSalvarLook" type="button" aria-label="Salvar look">
               <svg viewBox="0 0 24 24">
                 <path d="M5 12h14M13 6l6 6-6 6"/>
               </svg>
             </button>
           </div>
 
-          <!-- coluna direita: peças selecionadas por região -->
-          <div class="colunaLook" id="colunaLook">
-            <div class="regiaoVazia">
-              <span>Clique nos pontos da silhueta para adicionar peças ao look</span>
-            </div>
+          <!-- coluna direita: em cima o look sendo montado, embaixo os looks já criados -->
+          <div class="colunaLook">
+
+            <!-- look em montagem (preenchido pelo JS a cada peça escolhida) -->
+            <section class="secaoLook">
+              <div class="cabecalhoSecaoLook">
+                <h3 class="tituloSecaoLook">Look em montagem</h3>
+                <button class="botaoLimparLook" id="btnLimparLook" type="button" hidden>Limpar</button>
+              </div>
+              <div class="montagemLook" id="colunaLook">
+                <div class="regiaoVazia">
+                  <span>Clique nos pontos da silhueta para adicionar peças ao look</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- galeria com todos os looks salvos do cliente (preenchida pelo JS) -->
+            <section class="secaoLook">
+              <div class="cabecalhoSecaoLook">
+                <h3 class="tituloSecaoLook">Looks criados</h3>
+                <!-- filtro por categoria de look (Inverno, Festa...) -->
+                <select class="filtroLooks" id="filtroLooks" aria-label="Filtrar looks por categoria">
+                  <option value="">Todas as categorias</option>
+                </select>
+              </div>
+              <div class="galeriaLooks" id="galeriaLooks">
+                <p class="semPecas">Nenhum look criado ainda.</p>
+              </div>
+            </section>
+
           </div>
 
         </div>
 
-        <!-- modal de seleção de peça -->
+        <!--
+          Modal de seleção de peça.
+          Abre ao clicar numa bolinha. Dá para marcar VÁRIAS peças da mesma parte
+          (ex.: vários acessórios). Clicar de novo numa peça marcada desmarca.
+        -->
         <div class="modalSelecionarPeca" id="modalSelecionarPeca">
           <div class="cartaoSelecionarPeca">
 
             <div class="cabecalhoModalPeca">
-              <p class="tituloModalPeca" id="tituloModalPeca">Selecionar peça</p>
+              <div>
+                <p class="tituloModalPeca" id="tituloModalPeca">Selecionar peça</p>
+                <p class="subtituloModalPeca">Clique nas peças para adicionar ou remover do look</p>
+              </div>
 
-              <button class="fecharModalPeca" id="fecharModalPeca" type="button">
+              <button class="fecharModalPeca" id="fecharModalPeca" type="button" aria-label="Fechar">
                 <svg viewBox="0 0 24 24">
                   <path d="M18 6 6 18M6 6l12 12"/>
                 </svg>
@@ -396,6 +480,46 @@
               <span>Carregando...</span>
             </div>
 
+            <button class="botaoCadastrar" id="btnConcluirPecas" type="button">Concluir</button>
+          </div>
+        </div>
+
+        <!--
+          Modal para SALVAR o look.
+          Pede o nome do look e as categorias do look (Inverno, Festa, Casamento...).
+          Pode marcar mais de uma categoria e também cadastrar uma nova ali mesmo.
+        -->
+        <div class="modalSelecionarPeca" id="modalSalvarLook">
+          <div class="cartaoSelecionarPeca">
+
+            <div class="cabecalhoModalPeca">
+              <p class="tituloModalPeca">Salvar look</p>
+              <button class="fecharModalPeca" id="fecharModalSalvarLook" type="button" aria-label="Fechar">
+                <svg viewBox="0 0 24 24">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="campoCadastro">
+              <label for="tituloLook">Nome do look</label>
+              <input type="text" id="tituloLook" placeholder="Ex: Jantar de sexta" maxlength="100">
+            </div>
+
+            <div class="campoCadastro">
+              <label>Categorias do look</label>
+              <!-- chips das categorias de look, montados pelo JS -->
+              <div class="chipsCategoriaLook" id="chipsCategoriaLook"></div>
+            </div>
+
+            <!-- cadastro rápido de nova categoria de look -->
+            <div class="novaCategoriaLook">
+              <input type="text" id="inputNovaCategoriaLook" placeholder="Nova categoria (ex: Formatura)" maxlength="100">
+              <button class="botaoAdicionarPeca botaoSecundario" id="btnNovaCategoriaLook" type="button">Adicionar</button>
+            </div>
+
+            <p class="msgRetorno" id="msgSalvarLook" hidden></p>
+            <button class="botaoCadastrar" id="btnConfirmarSalvarLook" type="button">Salvar look</button>
           </div>
         </div>
 
@@ -410,6 +534,17 @@
     <div class="botoesConfirmacao">
       <button class="btnNao" id="btnNaoPeca" type="button">Não</button>
       <button class="btnSim" id="btnSimPeca" type="button">Sim</button>
+    </div>
+  </div>
+</div>
+
+<!-- confirmação para excluir um look (mesmo visual da exclusão de peça) -->
+<div class="modalConfirmacaoPeca" id="modalConfirmacaoLook">
+  <div class="cartaoConfirmacao">
+    <p>Deseja realmente excluir este look? As peças continuam salvas.</p>
+    <div class="botoesConfirmacao">
+      <button class="btnNao" id="btnNaoLook" type="button">Não</button>
+      <button class="btnSim" id="btnSimLook" type="button">Sim</button>
     </div>
   </div>
 </div>

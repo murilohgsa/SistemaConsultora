@@ -40,6 +40,12 @@ function iniciarAbas() {
         const clienteAtivo = document.querySelector('.itemCliente[aria-current="true"]');
         if (clienteAtivo) carregarPecas(clienteAtivo.dataset.id);
       }
+
+      // aba de looks: carrega as peças (para as bolinhas) e os looks já criados
+      if (aba.dataset.aba === 'looks') {
+        const clienteAtivo = document.querySelector('.itemCliente[aria-current="true"]');
+        if (clienteAtivo) carregarDadosLooks(clienteAtivo.dataset.id);
+      }
     });
   });
 }
@@ -209,6 +215,12 @@ function ativarCliente(btn) {
   if (abaAtiva && abaAtiva.dataset.aba === 'pecas') {
     carregarPecas(btn.dataset.id);
   }
+
+  // trocou de cliente: o look em montagem era do cliente anterior, então zera
+  limparLookAtual();
+  if (abaAtiva && abaAtiva.dataset.aba === 'looks') {
+    carregarDadosLooks(btn.dataset.id);
+  }
 }
 
 function trocarCliente() {
@@ -302,10 +314,12 @@ function iniciarBalaoAdicionarPeca() {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     const clienteAtivo = document.querySelector('.itemCliente[aria-current="true"]');
-    if (clienteAtivo) {
-      window.location.href = `/adicionar_peca_cliente?id_cliente=${clienteAtivo.dataset.id}`;
-    }
+    if (!clienteAtivo) return;
+    // Antes aqui redirecionava para /adicionar_peca_cliente, rota que não existe (dava 404).
+    // Agora abre o balão e preenche o id do cliente no campo escondido do formulário,
+    // que a rota /adicionar_peca precisa para saber de quem é a peça.
     balao.classList.contains('aberto') ? fecharBalaoAdicionarPeca() : abrirBalaoAdicionarPeca();
+    document.getElementById('inputIdCliente').value = clienteAtivo.dataset.id;
   });
 
   balao.addEventListener('click', (e) => e.stopPropagation());
@@ -326,14 +340,603 @@ function carregarCategorias() {
   fetch('/categorias')
     .then(res => res.json())
     .then(categorias => {
-      categorias.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.id_categoria;
-        option.textContent = cat.nome;
-        select.appendChild(option);
-      });
+      categoriasPeca = categorias;
+      preencherSelectCategorias();
+      renderizarListaCategorias();
     })
     .catch(() => console.log('Erro ao carregar categorias'));
+}
+
+
+/* =====================================================================
+   CATEGORIAS DE PEÇA
+   ---------------------------------------------------------------------
+   Cada categoria (Calça, Sapato, Boné...) tem uma parte_corpo (1 a 5).
+   É por ela que a silhueta sabe quais peças mostrar em cada bolinha.
+   ===================================================================== */
+
+// Nomes das partes do corpo. Os números são os mesmos da tabela parte_corpo
+// do banco e do data-parte das bolinhas no HTML.
+const PARTES_CORPO = { 1: 'Cabeça', 2: 'Tronco', 3: 'Cintura', 4: 'Pés', 5: 'Acessório' };
+
+var categoriasPeca = [];   // lista vinda de /categorias: [{id_categoria, nome, parte_corpo}]
+
+// Evita que nomes digitados pelo usuário (ex.: "<b>") virem HTML na tela
+function escaparHtml(texto) {
+  const div = document.createElement('div');
+  div.textContent = texto == null ? '' : texto;
+  return div.innerHTML;
+}
+
+// Preenche o <select> de categoria do formulário "Nova Peça",
+// agrupando as opções por parte do corpo com <optgroup>
+function preencherSelectCategorias() {
+  const select = document.getElementById('categoriaPeca');
+  if (!select) return;
+
+  const valorAtual = select.value;
+  select.innerHTML = '<option value="" disabled selected>Selecione...</option>';
+
+  // um grupo para cada parte do corpo + um grupo final para categorias sem parte
+  const grupos = [...Object.keys(PARTES_CORPO).map(Number), null];
+  grupos.forEach(parte => {
+    const daParte = categoriasPeca.filter(cat => (cat.parte_corpo || null) === parte);
+    if (daParte.length === 0) return;
+
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = parte ? PARTES_CORPO[parte] : 'Sem parte do corpo';
+    daParte.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat.id_categoria;
+      option.textContent = cat.nome;
+      optgroup.appendChild(option);
+    });
+    select.appendChild(optgroup);
+  });
+
+  if (valorAtual) select.value = valorAtual;
+}
+
+// Mostra, dentro do balão de categorias, as categorias existentes por parte do corpo
+function renderizarListaCategorias() {
+  const lista = document.getElementById('listaCategorias');
+  if (!lista) return;
+
+  lista.innerHTML = Object.entries(PARTES_CORPO).map(([parte, nomeParte]) => {
+    const daParte = categoriasPeca.filter(cat => cat.parte_corpo === Number(parte));
+    return `
+      <div class="grupoCategoriaParte">
+        <span class="nomeParteCategoria">${nomeParte}</span>
+        <div class="chipsCategoria">
+          ${daParte.length
+            ? daParte.map(cat => `<span class="chipCategoria">${escaparHtml(cat.nome)}</span>`).join('')
+            : '<span class="chipCategoria vazio">Nenhuma</span>'}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function abrirBalaoCategorias() {
+  document.getElementById('balaoCategorias').classList.add('aberto');
+  document.getElementById('overlayAdicionarPeca').classList.add('aberto');
+  document.getElementById('nomeCategoria').focus();
+}
+
+function fecharBalaoCategorias() {
+  const balao = document.getElementById('balaoCategorias');
+  if (!balao.classList.contains('aberto')) return;
+  balao.classList.remove('aberto');
+  document.getElementById('overlayAdicionarPeca').classList.remove('aberto');
+  document.getElementById('formCategoria').reset();
+  document.getElementById('msgCategoria').hidden = true;
+}
+
+// Mostra a mensagem verde/vermelha usada nos formulários (mesmo estilo do .msgRetorno do cadastro)
+function mostrarMensagem(elemento, texto, tipo) {
+  elemento.textContent = texto;
+  elemento.className = `msgRetorno ${tipo}`;
+  elemento.hidden = false;
+}
+
+function iniciarBalaoCategorias() {
+  const btn = document.getElementById('btnCategorias');
+  const balao = document.getElementById('balaoCategorias');
+  const form = document.getElementById('formCategoria');
+  const msg = document.getElementById('msgCategoria');
+  if (!btn || !balao || !form) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    balao.classList.contains('aberto') ? fecharBalaoCategorias() : abrirBalaoCategorias();
+  });
+
+  // clique dentro do balão não fecha; clique fora ou ESC fecha
+  balao.addEventListener('click', (e) => e.stopPropagation());
+  document.addEventListener('click', (e) => {
+    if (!balao.contains(e.target) && e.target !== btn) fecharBalaoCategorias();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') fecharBalaoCategorias();
+  });
+
+  // envia a nova categoria para o Flask (/adicionar_categoria) sem recarregar a página
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome = form.nome.value.trim();
+    const parte = form.querySelector('input[name="parte_corpo"]:checked');
+    if (!nome || !parte) {
+      mostrarMensagem(msg, 'Preencha o nome e escolha a parte do corpo.', 'erro');
+      return;
+    }
+
+    try {
+      const res = await fetch('/adicionar_categoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, parte_corpo: Number(parte.value) })
+      });
+      const dados = await res.json();
+      if (!res.ok) {
+        mostrarMensagem(msg, dados.erro || 'Erro ao cadastrar categoria.', 'erro');
+        return;
+      }
+
+      // coloca a categoria nova na lista e atualiza select + lista do balão
+      categoriasPeca.push(dados);
+      categoriasPeca.sort((a, b) => a.nome.localeCompare(b.nome));
+      preencherSelectCategorias();
+      renderizarListaCategorias();
+      form.reset();
+      mostrarMensagem(msg, `Categoria "${dados.nome}" cadastrada!`, 'sucesso');
+    } catch {
+      mostrarMensagem(msg, 'Erro ao cadastrar categoria.', 'erro');
+    }
+  });
+}
+
+
+/* =====================================================================
+   ABA "ADICIONAR LOOKS"
+   ---------------------------------------------------------------------
+   Fluxo:
+   1. Ao abrir a aba, busca as peças do cliente (/pecas/<id>) e os looks
+      já salvos (/looks/<id>).
+   2. Clicar numa bolinha da silhueta abre um modal com as peças daquela
+      parte do corpo. Dá para marcar várias (ex.: vários acessórios).
+   3. As peças marcadas aparecem no "Look em montagem", desenhadas como
+      um boneco (cabeça em cima, pés embaixo, acessórios ao lado).
+   4. A seta verde abre o modal de salvar: nome + categorias do look.
+   5. O look salvo vai para a galeria "Looks criados".
+   ===================================================================== */
+
+var pecasCliente = [];        // todas as peças do cliente ativo (vêm de /pecas/<id>)
+var looksCliente = [];        // looks salvos do cliente ativo (vêm de /looks/<id>)
+var categoriasLook = [];      // categorias de look (Inverno, Festa...) de /categorias_look
+var parteAberta = null;       // qual bolinha está aberta no modal (1 a 5)
+var idLookExcluir = null;     // look que vai ser excluído (esperando o "Sim")
+
+// Peças escolhidas no look em montagem, separadas por parte do corpo.
+// Guardamos só os ids; os dados completos ficam em pecasCliente.
+var lookAtual = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+
+function idClienteAtivo() {
+  const clienteAtivo = document.querySelector('.itemCliente[aria-current="true"]');
+  return clienteAtivo ? clienteAtivo.dataset.id : null;
+}
+
+// Busca as peças e os looks do cliente ao mesmo tempo (Promise.all)
+function carregarDadosLooks(idCliente) {
+  const galeria = document.getElementById('galeriaLooks');
+  galeria.innerHTML = '<p class="semPecas">Carregando looks...</p>';
+
+  Promise.all([
+    fetch(`/pecas/${idCliente}`).then(res => res.json()),
+    fetch(`/looks/${idCliente}`).then(res => res.json())
+  ])
+    .then(([pecas, looks]) => {
+      // se o usuário trocou de cliente enquanto carregava, ignora a resposta antiga
+      if (idCliente !== idClienteAtivo()) return;
+      pecasCliente = pecas || [];
+      looksCliente = looks || [];
+      renderizarMontagem();
+      renderizarGaleriaLooks();
+    })
+    .catch(() => {
+      galeria.innerHTML = '<p class="semPecas">Erro ao carregar looks.</p>';
+    });
+}
+
+// Busca uma peça pelo id dentro das peças já carregadas
+function buscarPeca(idPeca) {
+  return pecasCliente.find(p => p.id_peca === idPeca);
+}
+
+// Junta todas as peças escolhidas em uma lista só (usado no boneco e ao salvar)
+function pecasDoLookAtual() {
+  return Object.values(lookAtual).flat().map(buscarPeca).filter(Boolean);
+}
+
+function limparLookAtual() {
+  lookAtual = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+  renderizarMontagem();
+}
+
+/* ---------- desenho do "boneco" ----------
+   Recebe uma lista de peças (cada uma com parte_corpo) e devolve o HTML
+   do look montado: uma coluna central com cabeça > tronco > cintura > pés
+   e uma coluna lateral com os acessórios. Peças da mesma parte ficam lado
+   a lado, levemente sobrepostas, como numa foto de "flat lay".
+   É usado tanto no look em montagem quanto nos cards da galeria. */
+function montarBoneco(pecas) {
+  const porParte = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+  pecas.forEach(peca => {
+    // peça com categoria sem parte do corpo entra como acessório para não sumir
+    const parte = porParte[peca.parte_corpo] ? peca.parte_corpo : 5;
+    porParte[parte].push(peca);
+  });
+
+  const imagem = peca => `
+    <img src="${peca.imagem || '/static/img/peca_padrao.png'}"
+         alt="${escaparHtml(peca.titulo)}" title="${escaparHtml(peca.titulo)}" loading="lazy">`;
+
+  // cada parte vira uma "faixa" do boneco; partes vazias não aparecem
+  const faixa = (parte, classe) => porParte[parte].length
+    ? `<div class="faixaBoneco ${classe}">${porParte[parte].map(imagem).join('')}</div>`
+    : '';
+
+  return `
+    <div class="bonecoLook ${porParte[5].length ? 'comAcessorios' : ''}">
+      <div class="corpoBoneco">
+        ${faixa(1, 'faixaCabeca')}
+        ${faixa(2, 'faixaTronco')}
+        ${faixa(3, 'faixaCintura')}
+        ${faixa(4, 'faixaPes')}
+      </div>
+      ${porParte[5].length ? `<div class="acessoriosBoneco">${porParte[5].map(imagem).join('')}</div>` : ''}
+    </div>
+  `;
+}
+
+// Atualiza o número que aparece em cima de cada bolinha da silhueta
+function atualizarContadoresPontos() {
+  document.querySelectorAll('.pontoCampo').forEach(ponto => {
+    const total = lookAtual[ponto.dataset.parte].length;
+    const contador = ponto.querySelector('.contadorPonto');
+    contador.textContent = total;
+    contador.hidden = total === 0;
+    ponto.classList.toggle('preenchido', total > 0);
+  });
+}
+
+// Desenha o "Look em montagem": boneco à esquerda e lista por parte à direita
+function renderizarMontagem() {
+  const coluna = document.getElementById('colunaLook');
+  const btnLimpar = document.getElementById('btnLimparLook');
+  const pecas = pecasDoLookAtual();
+
+  atualizarContadoresPontos();
+  btnLimpar.hidden = pecas.length === 0;
+
+  if (pecas.length === 0) {
+    coluna.innerHTML = `
+      <div class="regiaoVazia">
+        <span>Clique nos pontos da silhueta para adicionar peças ao look</span>
+      </div>`;
+    return;
+  }
+
+  // lista das peças escolhidas, separada por parte do corpo, com botão de remover
+  const listaPartes = Object.entries(PARTES_CORPO)
+    .filter(([parte]) => lookAtual[parte].length > 0)
+    .map(([parte, nomeParte]) => `
+      <div class="grupoRegiao">
+        <span class="tituloRegiao">${nomeParte}</span>
+        <div class="pecasSelecionadasRegiao">
+          ${lookAtual[parte].map(buscarPeca).filter(Boolean).map(peca => `
+            <div class="cardPecaSelecionada">
+              <img src="${peca.imagem || '/static/img/peca_padrao.png'}" alt="${escaparHtml(peca.titulo)}">
+              <button class="removerPeca" type="button" data-parte="${parte}" data-id="${peca.id_peca}"
+                      aria-label="Remover ${escaparHtml(peca.titulo)} do look">
+                <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+  coluna.innerHTML = `
+    <div class="previaBoneco">${montarBoneco(pecas)}</div>
+    <div class="listaPartesLook">${listaPartes}</div>
+  `;
+
+  // botão X de cada peça: tira a peça do look
+  coluna.querySelectorAll('.removerPeca').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const parte = btn.dataset.parte;
+      lookAtual[parte] = lookAtual[parte].filter(id => id !== Number(btn.dataset.id));
+      renderizarMontagem();
+    });
+  });
+}
+
+/* ---------- modal de escolher peças de uma parte ---------- */
+
+function abrirModalParte(parte) {
+  parteAberta = parte;
+  document.getElementById('tituloModalPeca').textContent = `Peças — ${PARTES_CORPO[parte]}`;
+  renderizarPecasModal();
+  document.getElementById('modalSelecionarPeca').classList.add('aberto');
+}
+
+function fecharModalParte() {
+  document.getElementById('modalSelecionarPeca').classList.remove('aberto');
+  parteAberta = null;
+}
+
+// Lista no modal só as peças do cliente cuja categoria é da parte clicada
+function renderizarPecasModal() {
+  const lista = document.getElementById('listaPecasModal');
+  const daParte = pecasCliente.filter(peca => peca.parte_corpo === parteAberta);
+
+  if (daParte.length === 0) {
+    lista.innerHTML = `
+      <p class="avisoModalPeca">
+        Nenhuma peça de <strong>${PARTES_CORPO[parteAberta]}</strong> cadastrada para este cliente.<br>
+        Cadastre a peça na aba <strong>Peças</strong> usando uma categoria dessa parte do corpo.
+      </p>`;
+    return;
+  }
+
+  lista.innerHTML = daParte.map(peca => `
+    <button type="button"
+            class="cardPecaModal ${lookAtual[parteAberta].includes(peca.id_peca) ? 'selecionada' : ''}"
+            data-id="${peca.id_peca}" aria-pressed="${lookAtual[parteAberta].includes(peca.id_peca)}">
+      <img src="${peca.imagem || '/static/img/peca_padrao.png'}" alt="">
+      <span>${escaparHtml(peca.titulo)}</span>
+      <small>${escaparHtml(peca.categoria_nome)}</small>
+    </button>
+  `).join('');
+
+  // clicar marca/desmarca a peça (permite várias peças na mesma parte)
+  lista.querySelectorAll('.cardPecaModal').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = Number(card.dataset.id);
+      const escolhidas = lookAtual[parteAberta];
+      lookAtual[parteAberta] = escolhidas.includes(id)
+        ? escolhidas.filter(x => x !== id)
+        : [...escolhidas, id];
+      const marcada = lookAtual[parteAberta].includes(id);
+      card.classList.toggle('selecionada', marcada);
+      card.setAttribute('aria-pressed', marcada);
+      renderizarMontagem();
+    });
+  });
+}
+
+function iniciarSilhueta() {
+  document.querySelectorAll('.pontoCampo').forEach(ponto => {
+    ponto.addEventListener('click', () => abrirModalParte(Number(ponto.dataset.parte)));
+  });
+
+  const modal = document.getElementById('modalSelecionarPeca');
+  document.getElementById('fecharModalPeca').addEventListener('click', fecharModalParte);
+  document.getElementById('btnConcluirPecas').addEventListener('click', fecharModalParte);
+  // clique no fundo escuro fecha o modal
+  modal.addEventListener('click', (e) => { if (e.target === modal) fecharModalParte(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModalParte(); });
+
+  document.getElementById('btnLimparLook').addEventListener('click', limparLookAtual);
+}
+
+/* ---------- salvar look (nome + categorias do look) ---------- */
+
+function carregarCategoriasLook() {
+  return fetch('/categorias_look')
+    .then(res => res.json())
+    .then(categorias => {
+      categoriasLook = categorias || [];
+      preencherFiltroLooks();
+    })
+    .catch(() => console.log('Erro ao carregar categorias de look'));
+}
+
+// Chips clicáveis de categoria de look dentro do modal de salvar
+function renderizarChipsCategoriaLook(marcadas = []) {
+  const chips = document.getElementById('chipsCategoriaLook');
+  chips.innerHTML = categoriasLook.map(cat => `
+    <label class="chipCategoriaLook">
+      <input type="checkbox" value="${cat.id_categoria_look}"
+             ${marcadas.includes(cat.id_categoria_look) ? 'checked' : ''}>
+      <span>${escaparHtml(cat.nome)}</span>
+    </label>
+  `).join('');
+}
+
+// Ids das categorias de look que estão marcadas no modal
+function categoriasLookMarcadas() {
+  return [...document.querySelectorAll('#chipsCategoriaLook input:checked')].map(i => Number(i.value));
+}
+
+function abrirModalSalvarLook() {
+  // não deixa abrir o modal sem nenhuma peça no look
+  if (pecasDoLookAtual().length === 0) {
+    const silhueta = document.querySelector('.silhuetaWrapper');
+    silhueta.classList.remove('balancar');
+    void silhueta.offsetWidth;   // reinicia a animação
+    silhueta.classList.add('balancar');
+    return;
+  }
+  document.getElementById('msgSalvarLook').hidden = true;
+  renderizarChipsCategoriaLook(categoriasLookMarcadas());
+  document.getElementById('modalSalvarLook').classList.add('aberto');
+  document.getElementById('tituloLook').focus();
+}
+
+function fecharModalSalvarLook() {
+  document.getElementById('modalSalvarLook').classList.remove('aberto');
+}
+
+async function salvarLook() {
+  const msg = document.getElementById('msgSalvarLook');
+  const btn = document.getElementById('btnConfirmarSalvarLook');
+  const titulo = document.getElementById('tituloLook').value.trim();
+
+  if (!titulo) {
+    mostrarMensagem(msg, 'Dê um nome para o look.', 'erro');
+    return;
+  }
+
+  btn.disabled = true;   // evita salvar duas vezes com clique duplo
+  try {
+    const res = await fetch('/salvar_look', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_cliente: Number(idClienteAtivo()),
+        titulo,
+        pecas: pecasDoLookAtual().map(p => p.id_peca),
+        categorias: categoriasLookMarcadas()
+      })
+    });
+    const dados = await res.json();
+    if (!res.ok) {
+      mostrarMensagem(msg, dados.erro || 'Erro ao salvar o look.', 'erro');
+      return;
+    }
+
+    // deu certo: fecha o modal, limpa a montagem e recarrega a galeria
+    fecharModalSalvarLook();
+    document.getElementById('tituloLook').value = '';
+    renderizarChipsCategoriaLook([]);
+    limparLookAtual();
+    carregarDadosLooks(idClienteAtivo());
+  } catch {
+    mostrarMensagem(msg, 'Erro ao salvar o look.', 'erro');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Cadastra uma categoria de look nova direto do modal e já deixa marcada
+async function adicionarCategoriaLook() {
+  const input = document.getElementById('inputNovaCategoriaLook');
+  const msg = document.getElementById('msgSalvarLook');
+  const nome = input.value.trim();
+  if (!nome) return;
+
+  try {
+    const res = await fetch('/adicionar_categoria_look', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome })
+    });
+    const dados = await res.json();
+    if (!res.ok) {
+      mostrarMensagem(msg, dados.erro || 'Erro ao cadastrar categoria.', 'erro');
+      return;
+    }
+    const marcadas = [...categoriasLookMarcadas(), dados.id_categoria_look];
+    categoriasLook.push(dados);
+    categoriasLook.sort((a, b) => a.nome.localeCompare(b.nome));
+    renderizarChipsCategoriaLook(marcadas);
+    preencherFiltroLooks();
+    input.value = '';
+    msg.hidden = true;
+  } catch {
+    mostrarMensagem(msg, 'Erro ao cadastrar categoria.', 'erro');
+  }
+}
+
+function iniciarSalvarLook() {
+  const modal = document.getElementById('modalSalvarLook');
+  document.getElementById('btnSalvarLook').addEventListener('click', abrirModalSalvarLook);
+  document.getElementById('fecharModalSalvarLook').addEventListener('click', fecharModalSalvarLook);
+  document.getElementById('btnConfirmarSalvarLook').addEventListener('click', salvarLook);
+  document.getElementById('btnNovaCategoriaLook').addEventListener('click', adicionarCategoriaLook);
+  // Enter no campo de nova categoria cadastra; Enter no nome do look salva
+  document.getElementById('inputNovaCategoriaLook').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); adicionarCategoriaLook(); }
+  });
+  document.getElementById('tituloLook').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); salvarLook(); }
+  });
+  modal.addEventListener('click', (e) => { if (e.target === modal) fecharModalSalvarLook(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModalSalvarLook(); });
+}
+
+/* ---------- galeria "Looks criados" ---------- */
+
+// Opções do filtro de categoria em cima da galeria
+function preencherFiltroLooks() {
+  const filtro = document.getElementById('filtroLooks');
+  const valorAtual = filtro.value;
+  filtro.innerHTML = '<option value="">Todas as categorias</option>' +
+    categoriasLook.map(cat => `<option value="${cat.id_categoria_look}">${escaparHtml(cat.nome)}</option>`).join('');
+  filtro.value = valorAtual;
+}
+
+function renderizarGaleriaLooks() {
+  const galeria = document.getElementById('galeriaLooks');
+  const filtro = Number(document.getElementById('filtroLooks').value) || null;
+
+  // se tiver filtro, mostra só os looks que têm aquela categoria
+  const looks = filtro
+    ? looksCliente.filter(look => look.categorias.some(c => c.id_categoria_look === filtro))
+    : looksCliente;
+
+  if (looks.length === 0) {
+    galeria.innerHTML = `<p class="semPecas">${filtro ? 'Nenhum look nessa categoria.' : 'Nenhum look criado ainda.'}</p>`;
+    return;
+  }
+
+  galeria.innerHTML = looks.map(look => `
+    <article class="cardLook">
+      <div class="fundoCardLook">
+        ${montarBoneco(look.pecas)}
+        <button class="btnExcluirPeca btnExcluirLook" type="button" data-id="${look.id_look}"
+                aria-label="Excluir look ${escaparHtml(look.titulo)}">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6M14 11v6"/>
+          </svg>
+        </button>
+      </div>
+      <div class="infoCardLook">
+        <span class="tituloCardLook">${escaparHtml(look.titulo)}</span>
+        <span class="qtdPecasLook">${look.pecas.length} ${look.pecas.length === 1 ? 'peça' : 'peças'}</span>
+        <div class="chipsCategoria">
+          ${look.categorias.map(c => `<span class="chipCategoria">${escaparHtml(c.nome)}</span>`).join('')}
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  // lixeira de cada look abre a confirmação
+  galeria.querySelectorAll('.btnExcluirLook').forEach(btn => {
+    btn.addEventListener('click', () => {
+      idLookExcluir = btn.dataset.id;
+      document.getElementById('modalConfirmacaoLook').classList.add('aberto');
+    });
+  });
+}
+
+function iniciarGaleriaLooks() {
+  document.getElementById('filtroLooks').addEventListener('change', renderizarGaleriaLooks);
+
+  // confirmação de exclusão do look (mesmo padrão da exclusão de peça)
+  const modal = document.getElementById('modalConfirmacaoLook');
+  const fechar = () => { modal.classList.remove('aberto'); idLookExcluir = null; };
+
+  document.getElementById('btnNaoLook').addEventListener('click', fechar);
+  modal.addEventListener('click', (e) => { if (e.target === modal) fechar(); });
+  document.getElementById('btnSimLook').addEventListener('click', async () => {
+    if (!idLookExcluir) return;
+    const res = await fetch(`/excluir_look/${idLookExcluir}`, { method: 'POST' });
+    fechar();
+    if (res.ok) carregarDadosLooks(idClienteAtivo());
+  });
 }
 
 
@@ -346,3 +949,8 @@ iniciarAbas();
 iniciarBalaoAdicionarPeca();
 carregarCategorias();
 iniciarModalPeca();
+iniciarBalaoCategorias();   // balão de categorias de peça (aba Peças)
+iniciarSilhueta();          // bolinhas da silhueta + modal de escolher peças
+iniciarSalvarLook();        // modal de salvar look (nome + categorias)
+iniciarGaleriaLooks();      // galeria de looks criados + exclusão
+carregarCategoriasLook();   // categorias de look (Inverno, Festa...)

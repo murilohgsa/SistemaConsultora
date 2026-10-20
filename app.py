@@ -213,11 +213,14 @@ def pecas(id_cliente):
         return jsonify([]), 401
 
     try:
-        resposta = supabase_admin.table("pecas").select("id_peca, titulo, imagem, estacao, ocasiao, is_favorito, categoria(nome)").eq("id_cliente", id_cliente).execute()
+        # categoria(nome, parte_corpo) faz o "join" com a tabela categoria e já traz
+        # a parte do corpo (1 cabeça, 2 tronco, 3 cintura, 4 pés, 5 acessório)
+        resposta = supabase_admin.table("pecas").select("id_peca, titulo, imagem, estacao, ocasiao, is_favorito, categoria(nome, parte_corpo)").eq("id_cliente", id_cliente).execute()
 
         #formata os dados
         resultado = []
         for peca in resposta.data:
+            categoria = peca.get("categoria") or {}
             resultado.append({
                 "id_peca": peca["id_peca"],
                 "titulo": peca["titulo"],
@@ -225,7 +228,9 @@ def pecas(id_cliente):
                 "estacao": peca["estacao"],
                 "ocasiao": peca["ocasiao"],
                 "is_favorito": peca["is_favorito"],
-                "categoria_nome": peca.get("categoria", {}).get("nome") if peca.get("categoria") else "Sem categoria"
+                "categoria_nome": categoria.get("nome") or "Sem categoria",
+                # usado na aba de looks para filtrar as peças de cada bolinha da silhueta
+                "parte_corpo": categoria.get("parte_corpo")
             })
         return jsonify(resultado), 200
     except Exception:
@@ -238,11 +243,220 @@ def categorias():
         return jsonify([]), 401
 
     try:
-        resposta = supabase_admin.table("categoria").select("id_categoria, nome").execute()
+        # parte_corpo diz em qual bolinha da silhueta as peças dessa categoria aparecem
+        resposta = supabase_admin.table("categoria").select("id_categoria, nome, parte_corpo").order("nome").execute()
         return jsonify(resposta.data), 200
     except Exception:
         app.logger.exception("Erro ao buscar categorias")
         return jsonify([]), 500
+
+
+# --- 4. Categorias de peça e partes do corpo ---
+# Números das partes do corpo, iguais à tabela parte_corpo do banco
+# e ao data-parte das bolinhas da silhueta no gerenciamento.html
+PARTES_CORPO = {1: "Cabeça", 2: "Tronco", 3: "Cintura", 4: "Pés", 5: "Acessório"}
+
+@app.route("/adicionar_categoria", methods=["POST"])
+def adicionar_categoria():
+    # Cadastra uma nova categoria de PEÇA (ex.: "Brinco") já ligada a uma parte do corpo.
+    # Recebe JSON: {"nome": "Brinco", "parte_corpo": 5}
+    # Devolve a categoria criada em JSON, para o JavaScript já colocar ela nos selects.
+    if "user_id" not in session:
+        return jsonify({"erro": "Não autorizado"}), 401
+
+    dados = request.get_json(silent=True) or {}
+    nome = (dados.get("nome") or "").strip()
+    parte_corpo = dados.get("parte_corpo")
+
+    # validações: nome obrigatório e parte do corpo precisa ser 1 a 5
+    if not nome:
+        return jsonify({"erro": "Informe o nome da categoria."}), 400
+    try:
+        parte_corpo = int(parte_corpo)
+    except (TypeError, ValueError):
+        parte_corpo = None
+    if parte_corpo not in PARTES_CORPO:
+        return jsonify({"erro": "Escolha a parte do corpo."}), 400
+
+    try:
+        resposta = supabase_admin.table("categoria").insert({
+            "nome": nome,
+            "parte_corpo": parte_corpo
+        }).execute()
+        return jsonify(resposta.data[0]), 201
+    except Exception as e:
+        app.logger.exception("Erro ao adicionar categoria")
+        # o nome da categoria é UNIQUE no banco, então repetido cai aqui
+        if "duplicate" in str(e).lower():
+            return jsonify({"erro": "Essa categoria já existe."}), 409
+        return jsonify({"erro": "Erro ao adicionar categoria."}), 500
+
+
+# --- 5. Categorias de look (Inverno, Verão, Festa, Casamento...) ---
+
+@app.route("/categorias_look")
+def categorias_look():
+    # Lista as categorias do LOOK inteiro (não confundir com categoria da peça)
+    if "user_id" not in session:
+        return jsonify([]), 401
+
+    try:
+        resposta = supabase_admin.table("categoria_look").select("id_categoria_look, nome").order("nome").execute()
+        return jsonify(resposta.data), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar categorias de look")
+        return jsonify([]), 500
+
+@app.route("/adicionar_categoria_look", methods=["POST"])
+def adicionar_categoria_look():
+    # Cadastra uma nova categoria de look. Recebe JSON: {"nome": "Formatura"}
+    if "user_id" not in session:
+        return jsonify({"erro": "Não autorizado"}), 401
+
+    dados = request.get_json(silent=True) or {}
+    nome = (dados.get("nome") or "").strip()
+    if not nome:
+        return jsonify({"erro": "Informe o nome da categoria."}), 400
+
+    try:
+        resposta = supabase_admin.table("categoria_look").insert({"nome": nome}).execute()
+        return jsonify(resposta.data[0]), 201
+    except Exception as e:
+        app.logger.exception("Erro ao adicionar categoria de look")
+        if "duplicate" in str(e).lower():
+            return jsonify({"erro": "Essa categoria já existe."}), 409
+        return jsonify({"erro": "Erro ao adicionar categoria."}), 500
+
+
+# --- 6. Looks ---
+
+@app.route("/looks/<int:id_cliente>")
+def looks(id_cliente):
+    # Lista todos os looks de um cliente, cada um com:
+    #   - suas peças (imagem, título e parte do corpo, para montar o "boneco")
+    #   - suas categorias de look (Inverno, Festa...)
+    if "user_id" not in session:
+        return jsonify([]), 401
+
+    try:
+        # O select aninhado faz os joins de uma vez só:
+        #   looks -> look_pecas -> pecas -> categoria   (peças do look)
+        #   looks -> look_categoria -> categoria_look  (categorias do look)
+        resposta = supabase_admin.table("looks").select(
+            "id_look, titulo, is_favorito, data, "
+            "look_pecas(pecas(id_peca, titulo, imagem, categoria(nome, parte_corpo))), "
+            "look_categoria(categoria_look(id_categoria_look, nome))"
+        ).eq("id_cliente", id_cliente).order("data", desc=True).execute()
+
+        # formata os dados em um JSON mais simples para o JavaScript
+        resultado = []
+        for look in resposta.data:
+            pecas = []
+            for ligacao in look.get("look_pecas") or []:
+                peca = ligacao.get("pecas")
+                if not peca:
+                    continue
+                categoria = peca.get("categoria") or {}
+                pecas.append({
+                    "id_peca": peca["id_peca"],
+                    "titulo": peca["titulo"],
+                    "imagem": peca["imagem"],
+                    "categoria_nome": categoria.get("nome") or "Sem categoria",
+                    "parte_corpo": categoria.get("parte_corpo")
+                })
+
+            categorias = [
+                ligacao["categoria_look"]
+                for ligacao in look.get("look_categoria") or []
+                if ligacao.get("categoria_look")
+            ]
+
+            resultado.append({
+                "id_look": look["id_look"],
+                "titulo": look["titulo"],
+                "is_favorito": look["is_favorito"],
+                "pecas": pecas,
+                "categorias": categorias
+            })
+        return jsonify(resultado), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar looks")
+        return jsonify([]), 500
+
+@app.route("/salvar_look", methods=["POST"])
+def salvar_look():
+    # Salva um look novo. Recebe JSON:
+    # {
+    #   "id_cliente": 13,
+    #   "titulo": "Look jantar",
+    #   "pecas": [6, 10, 19],        -> id das peças escolhidas nas bolinhas
+    #   "categorias": [2, 6]         -> id das categorias de look (Verão, Festa...)
+    # }
+    if "user_id" not in session:
+        return jsonify({"erro": "Não autorizado"}), 401
+
+    dados = request.get_json(silent=True) or {}
+    id_cliente = dados.get("id_cliente")
+    titulo = (dados.get("titulo") or "").strip()
+    # set() tira ids repetidos, caso a mesma peça venha duas vezes
+    ids_pecas = list({int(i) for i in dados.get("pecas") or []})
+    ids_categorias = list({int(i) for i in dados.get("categorias") or []})
+
+    if not id_cliente or not titulo:
+        return jsonify({"erro": "Informe o nome do look."}), 400
+    if not ids_pecas:
+        return jsonify({"erro": "Adicione pelo menos uma peça ao look."}), 400
+
+    try:
+        # Segurança: confere se todas as peças são mesmo desse cliente,
+        # para ninguém montar um look com peças de outra pessoa
+        resposta_pecas = supabase_admin.table("pecas").select("id_peca") \
+            .eq("id_cliente", id_cliente).in_("id_peca", ids_pecas).execute()
+        if len(resposta_pecas.data) != len(ids_pecas):
+            return jsonify({"erro": "Alguma peça não pertence a este cliente."}), 400
+
+        # 1. cria o look e pega o id gerado
+        resposta_look = supabase_admin.table("looks").insert({
+            "id_cliente": int(id_cliente),
+            "titulo": titulo,
+            "is_favorito": False
+        }).execute()
+        id_look = resposta_look.data[0]["id_look"]
+
+        try:
+            # 2. liga as peças ao look (uma linha por peça em look_pecas)
+            supabase_admin.table("look_pecas").insert([
+                {"id_look": id_look, "id_peca": id_peca} for id_peca in ids_pecas
+            ]).execute()
+
+            # 3. liga as categorias ao look (uma linha por categoria em look_categoria)
+            if ids_categorias:
+                supabase_admin.table("look_categoria").insert([
+                    {"id_look": id_look, "id_categoria_look": id_cat} for id_cat in ids_categorias
+                ]).execute()
+        except Exception:
+            # se der erro nas ligações, apaga o look para não ficar um look "pela metade"
+            supabase_admin.table("looks").delete().eq("id_look", id_look).execute()
+            raise
+
+        return jsonify({"id_look": id_look}), 201
+    except Exception:
+        app.logger.exception("Erro ao salvar look")
+        return jsonify({"erro": "Erro ao salvar o look."}), 500
+
+@app.route("/excluir_look/<int:id_look>", methods=["POST"])
+def excluir_look(id_look):
+    # Apaga o look. As linhas de look_pecas e look_categoria somem sozinhas
+    # (ON DELETE CASCADE no banco). As PEÇAS continuam existindo.
+    if "user_id" not in session:
+        return "", 401
+
+    try:
+        supabase_admin.table("looks").delete().eq("id_look", id_look).execute()
+        return "", 200
+    except Exception:
+        app.logger.exception("Erro ao excluir look")
+        return "", 500
 
 @app.route("/adicionar_peca", methods=["POST"])
 def adicionar_peca():

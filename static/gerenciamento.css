@@ -1534,10 +1534,446 @@
   text-align: center;
   color: var(--black);
 }
+
+/* ======================================================================
+   LOOKS: categorias, silhueta, montagem do boneco e galeria
+   ====================================================================== */
+
+/* ---------- botão secundário (Categorias / Adicionar) ---------- */
+/* mesmo formato do botão "Adicionar Peça", só que com contorno */
+.cabecalhoPecas { gap: 10px; }
+
+.botaoSecundario {
+  background: transparent;
+  color: var(--black);
+  box-shadow: inset 0 0 0 1px var(--black);
+}
+
+/* ---------- balão de categorias de peça ---------- */
+.balaoCategorias { width: 520px; }
+
+/* aqui o form é uma coluna só (o do "Nova Peça" é em 2 colunas) */
+.balaoCategorias form { grid-template-columns: 1fr; }
+
+.listaCategorias {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 16px;
+}
+
+.grupoCategoriaParte {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: start;
+  gap: 10px;
+}
+
+.nomeParteCategoria {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(240,237,232,0.6);
+  padding-top: 4px;
+}
+
+/* chips usados na lista de categorias e nos cards de look */
+.chipsCategoria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chipCategoria {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  color: #f7f4ef;
+}
+
+.chipCategoria.vazio { opacity: .4; }
+
+/* ---------- silhueta: contador nas bolinhas ---------- */
+.pontoCampo.preenchido {
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* número de peças escolhidas naquela parte do corpo */
+.contadorPonto {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--black);
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* "balança" a silhueta quando tenta salvar um look vazio */
+.silhuetaWrapper.balancar { animation: balancar .4s; }
+
+@keyframes balancar {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ---------- coluna direita: seções ---------- */
+.secaoLook {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cabecalhoSecaoLook {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tituloSecaoLook {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--black);
+}
+
+.botaoLimparLook {
+  background: transparent;
+  border: none;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.botaoLimparLook:hover { color: var(--black); }
+
+.filtroLooks {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #e6e2da;
+  background: #fff;
+  color: var(--black);
+  cursor: pointer;
+}
+
+/* look em montagem: boneco à esquerda + lista por parte à direita */
+.montagemLook {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  min-height: 160px;
+}
+
+.montagemLook .regiaoVazia {
+  width: 100%;
+  min-height: 160px;
+  border: 1px dashed #d8d3ca;
+  border-radius: 18px;
+}
+
+.previaBoneco {
+  flex: none;
+  width: 240px;
+  background: #fff;
+  border: 1px solid #ece8e1;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.listaPartesLook {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* o X de remover fica sempre visível em telas de toque */
+@media (hover: none) {
+  .cardPecaSelecionada .removerPeca { opacity: 1; }
+}
+
+/* ---------- o "boneco" (look montado) ----------
+   Coluna central: cabeça, tronco, cintura e pés, de cima para baixo.
+   Coluna lateral: acessórios. As imagens usam object-fit: contain para a
+   peça aparecer inteira, e várias peças da mesma parte se sobrepõem um pouco. */
+.bonecoLook {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.corpoBoneco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.faixaBoneco {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.faixaBoneco img,
+.acessoriosBoneco img {
+  object-fit: contain;
+  border-radius: 10px;
+  background: #fff;
+  mix-blend-mode: multiply;   /* fundo branco das fotos some no fundo claro */
+  transition: transform .2s;
+}
+
+/* peças da mesma parte ficam levemente sobrepostas */
+.faixaBoneco img + img { margin-left: -14px; }
+
+.faixaBoneco img:hover,
+.acessoriosBoneco img:hover {
+  transform: scale(1.06);
+  position: relative;
+  z-index: 1;
+}
+
+/* tamanho de cada parte, proporcional ao corpo */
+.faixaCabeca img   { height: 52px;  max-width: 64px; }
+.faixaTronco img   { height: 120px; max-width: 120px; }
+.faixaCintura img  { height: 120px; max-width: 110px; }
+.faixaPes img      { height: 54px;  max-width: 70px; }
+
+.acessoriosBoneco {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  flex: none;
+}
+
+.acessoriosBoneco img { width: 46px; height: 46px; }
+
+/* ---------- galeria de looks criados ---------- */
+.galeriaLooks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+  padding-bottom: 24px;
+}
+
+.galeriaLooks .semPecas { grid-column: 1 / -1; padding: 32px; }
+
+.cardLook {
+  background: #fff;
+  border: 1px solid #ece8e1;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.cardLook:hover {
+  box-shadow: 0 10px 28px rgba(17,17,17,0.08);
+  transform: translateY(-2px);
+}
+
+/* fundo do boneco no card: tom de papel, igual ao resto do sistema */
+.fundoCardLook {
+  position: relative;
+  background: var(--paper);
+  padding: 18px 14px;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* boneco um pouco menor dentro do card */
+.cardLook .faixaTronco img,
+.cardLook .faixaCintura img { height: 96px; max-width: 96px; }
+.cardLook .faixaCabeca img  { height: 42px; }
+.cardLook .faixaPes img     { height: 44px; }
+.cardLook .acessoriosBoneco img { width: 38px; height: 38px; }
+
+/* lixeira do look aparece ao passar o mouse (reaproveita .btnExcluirPeca) */
+.btnExcluirLook {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.cardLook:hover .btnExcluirLook,
+.btnExcluirLook:focus-visible { opacity: 1; }
+
+@media (hover: none) {
+  .btnExcluirLook { opacity: 1; }
+}
+
+.infoCardLook {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tituloCardLook {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.qtdPecasLook {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* chips em fundo claro (dentro do card) */
+.infoCardLook .chipCategoria {
+  background: #f1ede6;
+  color: var(--black);
+}
+
+/* ---------- modais claros (escolher peça / salvar look) ---------- */
+.subtituloModalPeca {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.cardPecaModal {
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  position: relative;
+}
+
+.cardPecaModal small {
+  display: block;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 6px;
+}
+
+/* check preto no canto da peça marcada */
+.cardPecaModal.selecionada::after {
+  content: "✓";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--black);
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 22px;
+  text-align: center;
+}
+
+.avisoModalPeca {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 24px 8px;
+  text-align: center;
+  width: 100%;
+}
+
+/* os .campoCadastro foram feitos para fundo preto; aqui o fundo é branco */
+.cartaoSelecionarPeca .campoCadastro label { color: var(--muted); }
+
+.cartaoSelecionarPeca input[type="text"] {
+  background: #fff;
+  border: 1px solid #e6e2da;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  color: var(--black);
+  outline: none;
+  width: 100%;
+}
+
+.cartaoSelecionarPeca input[type="text"]:focus { border-color: var(--accent); }
+.cartaoSelecionarPeca input[type="text"]::placeholder { color: #b4ada3; }
+
+.cartaoSelecionarPeca .msgRetorno.erro { color: #c0392b; background: rgba(192,57,43,0.08); }
+
+.chipsCategoriaLook {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* os chips ficam dentro de .campoCadastro, cujo label é maiúsculo; aqui volta ao normal */
+.chipCategoriaLook { cursor: pointer; text-transform: none; letter-spacing: normal; }
+.chipCategoriaLook input { display: none; }
+
+.chipCategoriaLook span {
+  display: inline-flex;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #e6e2da;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  color: var(--black);
+  transition: background .2s, border-color .2s;
+}
+
+.chipCategoriaLook span:hover { border-color: var(--black); }
+
+.chipCategoriaLook input:checked + span {
+  background: var(--black);
+  border-color: var(--black);
+  color: #fff;
+}
+
+.novaCategoriaLook {
+  display: flex;
+  gap: 8px;
+}
+
+.novaCategoriaLook .botaoAdicionarPeca { flex: none; }
 /* ---------- responsividade ---------- */
 
 @media (max-width:1100px){
     .painelGraficos{grid-template-columns:1fr;}
+    /* look em montagem: boneco em cima e lista embaixo */
+    .montagemLook{flex-direction:column;}
+}
+
+@media (max-width:700px){
+    /* aba looks: silhueta em cima e looks embaixo, com rolagem da página */
+    .painelLooks{grid-template-columns:1fr; height:auto; overflow:visible;}
+    .colunaSilhueta{border-right:none; border-bottom:1px solid #e6e2da;}
+    .silhuetaWrapper{height:420px; flex:none;}
+    .colunaLook{padding:20px 16px;}
+    .previaBoneco{width:100%;}
 }
 
 @media (max-width:900px){
