@@ -1274,6 +1274,266 @@
 }
 
 .modalConfirmacaoPeca .btnSim:hover { background: #96271e; }
+
+/* ---------- aba looks ---------- */
+
+.painelLooks {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: calc(100vh - 200px);
+  overflow: hidden;
+}
+
+.colunaSilhueta {
+  border-right: 1px solid #e6e2da;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 16px;
+}
+
+.silhuetaWrapper {
+  position: relative;
+  width: 180px;
+  flex: 1;
+}
+
+.silhueta {
+  width: 100%;
+  height: auto;
+}
+
+.pontoCampo {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--black);
+  border: 2px solid #fff;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--black);
+  transition: transform .2s, background .2s;
+}
+
+.pontoCampo:hover {
+  transform: translate(-50%, -50%) scale(1.3);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.tooltipPonto {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--black);
+  color: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+
+.pontoCampo:hover .tooltipPonto { opacity: 1; }
+
+.botaoSalvarLook {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #3bb54a;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity .2s;
+  margin-top: 16px;
+}
+
+.botaoSalvarLook svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.botaoSalvarLook:hover { opacity: .85; }
+
+/* coluna direita */
+
+.colunaLook {
+  padding: 24px 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.regiaoVazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.grupoRegiao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tituloRegiao {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--black);
+  text-transform: capitalize;
+}
+
+.pecasSelecionadasRegiao {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardPecaSelecionada {
+  position: relative;
+  width: 100px;
+  cursor: pointer;
+}
+
+.cardPecaSelecionada img {
+  width: 100px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.cardPecaSelecionada .removerPeca {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(17,17,17,0.65);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+.cardPecaSelecionada:hover .removerPeca { opacity: 1; }
+
+.cardPecaSelecionada .removerPeca svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* modal selecionar peça */
+
+.modalSelecionarPeca {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,17,17,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+}
+
+.modalSelecionarPeca.aberto { display: flex; }
+
+.cartaoSelecionarPeca {
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  width: 520px;
+  max-width: 90vw;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cabecalhoModalPeca {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tituloModalPeca {
+  font-family: 'Jost', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.fecharModalPeca {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  padding: 4px;
+}
+
+.fecharModalPeca svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--black);
+  fill: none;
+}
+
+.listaPecasModal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.cardPecaModal {
+  width: 100px;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color .2s;
+}
+
+.cardPecaModal:hover { border-color: var(--accent); }
+.cardPecaModal.selecionada { border-color: var(--black); }
+
+.cardPecaModal img {
+  width: 100px;
+  height: 130px;
+  object-fit: cover;
+}
+
+.cardPecaModal span {
+  display: block;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  text-align: center;
+  color: var(--black);
+}
 /* ---------- responsividade ---------- */
 
 @media (max-width:1100px){

@@ -101,8 +101,8 @@
       <ul class="scrollClientes" role="list">
         {% for cliente in clientes %}
         <li class="linhaCliente">
-          <button class="itemCliente" type="button" data-id="{{ cliente.id_usuario }}" data-nome="{{ cliente.nome }}" data-foto="{{ cliente.foto_perfil or '/static/img/avatar_padrao.png'}}" {%if loop.first %}aria-current="true"{% endif %}>
-            <img src="{{ cliente.foto_perfil or 'foto_perfil.jpg' }}" alt="Foto de perfil de {{ cliente.nome }}">
+          <button class="itemCliente" type="button" data-id="{{ cliente.id_usuario }}" data-nome="{{ cliente.nome }}" data-foto="{{ cliente.foto_perfil or '/static/img/foto_perfil.jpg'}}" {%if loop.first %}aria-current="true"{% endif %}>
+            <img src="{{ cliente.foto_perfil or '/static/img/foto_perfil.jpg' }}" alt="Foto de perfil de {{ cliente.nome }}">
             {{ cliente.nome }}
           </button>
           <button class="btnOpcoes" type="button" aria-label="Opções">
@@ -285,7 +285,8 @@
               <span>Carregando peças...</span>
             </div>
           </div>
-      
+        </div>
+      </div>
       <div class="painelAba" id="painel-relatorio" role="tabpanel" style="display:none">
         <div class="avisoGrafico" style="padding:48px">
           <span>Relatório em breve</span>
@@ -299,9 +300,105 @@
       </div>
 
       <div class="painelAba" id="painel-looks" role="tabpanel" style="display:none">
-        <div class="avisoGrafico" style="padding:48px">
-          <span>Adicionar Looks em breve</span>
+        <div class="painelLooks">
+
+          <!-- coluna esquerda: silhueta -->
+          <div class="colunaSilhueta">
+            <div class="silhuetaWrapper">
+
+              <!-- SVG da silhueta -->
+              <svg class="silhueta" viewBox="0 0 200 500" xmlns="http://www.w3.org/2000/svg">
+                <!-- cabeça -->
+                <ellipse cx="100" cy="40" rx="28" ry="35" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- pescoço -->
+                <rect x="88" y="72" width="24" height="18" fill="#e6e2da"/>
+
+                <!-- tronco -->
+                <path d="M60 90 Q50 130 55 180 L145 180 Q150 130 140 90 Q120 82 100 82 Q80 82 60 90Z" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- braço esquerdo -->
+                <path d="M60 95 Q40 130 38 175 Q42 178 50 175 Q55 140 68 108Z" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- braço direito -->
+                <path d="M140 95 Q160 130 162 175 Q158 178 150 175 Q145 140 132 108Z" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- cintura/quadril -->
+                <path d="M55 178 Q50 210 55 240 L145 240 Q150 210 145 178Z" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- perna esquerda -->
+                <path d="M55 238 Q50 300 52 370 Q60 375 72 370 Q72 300 75 240Z" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- perna direita -->
+                <path d="M125 240 Q128 300 128 370 Q140 375 148 370 Q150 300 145 238Z" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- pé esquerdo -->
+                <ellipse cx="62" cy="378" rx="18" ry="10" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+
+                <!-- pé direito -->
+                <ellipse cx="138" cy="378" rx="18" ry="10" fill="#e6e2da" stroke="#ccc" stroke-width="1"/>
+              </svg>
+
+              <!-- pontos clicáveis -->
+              <button class="pontoCampo" data-regiao="cabeca" style="top:6%; left:50%;" aria-label="Cabeça">
+                <span class="tooltipPonto">Cabeça</span>
+              </button>
+
+              <button class="pontoCampo" data-regiao="tronco" style="top:26%; left:50%;" aria-label="Tronco">
+                <span class="tooltipPonto">Tronco</span>
+              </button>
+
+              <button class="pontoCampo" data-regiao="cintura" style="top:46%; left:50%;" aria-label="Cintura">
+                <span class="tooltipPonto">Cintura</span>
+              </button>
+
+              <button class="pontoCampo" data-regiao="pes" style="top:78%; left:50%;" aria-label="Pés">
+                <span class="tooltipPonto">Pés</span>
+              </button>
+
+              <button class="pontoCampo" data-regiao="acessorio" style="top:36%; left:20%;" aria-label="Acessório">
+                <span class="tooltipPonto">Acessório</span>
+              </button>
+            </div>
+
+            <!-- botão salvar look -->
+            <button class="botaoSalvarLook" id="btnSalvarLook" type="button">
+              <svg viewBox="0 0 24 24">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- coluna direita: peças selecionadas por região -->
+          <div class="colunaLook" id="colunaLook">
+            <div class="regiaoVazia">
+              <span>Clique nos pontos da silhueta para adicionar peças ao look</span>
+            </div>
+          </div>
+
         </div>
+
+        <!-- modal de seleção de peça -->
+        <div class="modalSelecionarPeca" id="modalSelecionarPeca">
+          <div class="cartaoSelecionarPeca">
+
+            <div class="cabecalhoModalPeca">
+              <p class="tituloModalPeca" id="tituloModalPeca">Selecionar peça</p>
+
+              <button class="fecharModalPeca" id="fecharModalPeca" type="button">
+                <svg viewBox="0 0 24 24">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="listaPecasModal" id="listaPecasModal">
+              <span>Carregando...</span>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </section>
 
