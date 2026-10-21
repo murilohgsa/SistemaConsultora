@@ -1,0 +1,383 @@
+/* =====================================================================
+   LOOKS NA TELA DO CLIENTE (feed / Guarda Roupa)
+   Usa as cores do login.css (--black, --paper, --accent, --muted)
+   e o boneco do boneco.css.
+   ===================================================================== */
+
+/* ---------- cabeçalho: contagem e busca ---------- */
+.contagemLooks {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.buscaLooks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e6e2da;
+  border-radius: 30px;
+  padding: 9px 16px;
+  min-width: 260px;
+  transition: border-color .2s;
+}
+
+.buscaLooks:focus-within { border-color: var(--black); }
+
+.buscaLooks svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--muted);
+  fill: none;
+  flex: none;
+}
+
+.buscaLooks input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.88rem;
+  color: var(--black);
+  width: 100%;
+}
+
+/* ---------- filtros ---------- */
+.filtrosLooks {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -14px 0 28px;
+}
+
+.chipFiltroLook {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid #d8d3ca;
+  background: #fff;
+  color: var(--black);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+
+.chipFiltroLook:hover { border-color: var(--black); }
+
+.chipFiltroLook svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* filtro escolhido: preto, igual ao botão de filtro que já existia */
+.chipFiltroLook[aria-pressed="true"] {
+  background: var(--black);
+  border-color: var(--black);
+  color: #fff;
+}
+
+.totalFiltro {
+  font-size: 0.72rem;
+  opacity: .6;
+}
+
+/* ---------- card do look ---------- */
+/* tira as bolinhas de lista do <ul> e deixa os cards de uma linha com a mesma altura */
+#gradeLooks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-items: stretch;
+}
+
+.itemLook {
+  position: relative;   /* para a estrela ficar por cima do card */
+}
+
+.avisoLooks {
+  grid-column: 1 / -1;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+  padding: 64px 24px;
+}
+
+.cardMeuLook {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* sem altura fixa: o card cresce até caber o boneco inteiro (com aspect-ratio
+     fixo a cabeça e os pés ficavam cortados) */
+  height: 100%;
+  padding: 0;
+  border: 1px solid #ece8e1;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  color: var(--black);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(17,17,17,0.06);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.cardMeuLook:hover,
+.cardMeuLook:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(17,17,17,0.14);
+}
+
+.cardMeuLook:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* área do boneco, com fundo de papel */
+.fundoMeuLook {
+  flex: 1;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px;
+  background: var(--paper);
+}
+
+/* boneco um pouco menor dentro do card */
+.cardMeuLook .faixaTronco img,
+.cardMeuLook .faixaCintura img { height: 80px; max-width: 96px; }
+.cardMeuLook .faixaCabeca img  { height: 36px; }
+.cardMeuLook .faixaPes img     { height: 40px; }
+.cardMeuLook .acessoriosBoneco img { width: 36px; height: 36px; }
+
+.infoMeuLook {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 14px;
+}
+
+.nomeMeuLook {
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 0.98rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tagsMeuLook {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tagsMeuLook span {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.7rem;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: #f1ede6;
+  color: var(--black);
+}
+
+/* a .estrela vem do feed.css; aqui só ajusta o fundo para o card claro */
+.itemLook .estrela { background: rgba(17,17,17,0.55); }
+
+/* ---------- detalhe do look ---------- */
+.modalDetalheLook {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(17,17,17,0.55);
+}
+
+.modalDetalheLook.aberto { display: flex; }
+
+.cartaoDetalheLook {
+  position: relative;
+  width: 860px;
+  max-width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px;
+  color: var(--black);
+}
+
+.fecharDetalheLook {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: inline-flex;
+  padding: 6px;
+  border: none;
+  border-radius: 50%;
+  background: #f1ede6;
+  cursor: pointer;
+}
+
+.fecharDetalheLook svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--black);
+  fill: none;
+}
+
+.gradeDetalheLook {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.bonecoDetalhe {
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 24px 18px;
+  position: sticky;
+  top: 0;
+}
+
+/* boneco maior no detalhe */
+.bonecoDetalhe .faixaTronco img,
+.bonecoDetalhe .faixaCintura img { height: 140px; max-width: 140px; }
+.bonecoDetalhe .faixaCabeca img  { height: 60px; max-width: 76px; }
+.bonecoDetalhe .faixaPes img     { height: 62px; max-width: 84px; }
+.bonecoDetalhe .acessoriosBoneco img { width: 54px; height: 54px; }
+
+.infoDetalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: 'Jost', sans-serif;
+}
+
+.infoDetalhe h3 {
+  font-family: 'Bodoni Moda', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  padding-right: 40px;
+}
+
+.dataDetalhe {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: -6px;
+}
+
+.botaoFavoritoDetalhe {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid #d8d3ca;
+  background: #fff;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem;
+  color: var(--black);
+  cursor: pointer;
+}
+
+.botaoFavoritoDetalhe svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.botaoFavoritoDetalhe[aria-pressed="true"] svg {
+  fill: #f0c14b;
+  stroke: #f0c14b;
+}
+
+.parteDetalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f1ede6;
+}
+
+.nomeParteDetalhe {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pecasDetalhe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.pecasDetalhe li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pecasDetalhe img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex: none;
+}
+
+.pecasDetalhe span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pecasDetalhe strong {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.pecasDetalhe small {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* ---------- responsividade ---------- */
+@media (max-width: 760px) {
+  .gradeDetalheLook { grid-template-columns: 1fr; }
+  .bonecoDetalhe { position: static; }
+  .cartaoDetalheLook { padding: 22px 18px; }
+}
+
+@media (max-width: 520px) {
+  .buscaLooks { min-width: 0; width: 100%; }
+  .filtrosLooks { margin-top: -10px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .chipFiltroLook { flex: none; }
+  .modalDetalheLook { padding: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardMeuLook { transition: none; }
+}

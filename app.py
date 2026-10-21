@@ -330,58 +330,101 @@ def adicionar_categoria_look():
 
 # --- 6. Looks ---
 
-@app.route("/looks/<int:id_cliente>")
-def looks(id_cliente):
-    # Lista todos os looks de um cliente, cada um com:
+def buscar_looks_do_cliente(id_cliente):
+    # Busca todos os looks de um cliente, cada um com:
     #   - suas peças (imagem, título e parte do corpo, para montar o "boneco")
     #   - suas categorias de look (Inverno, Festa...)
+    # Usada pela tela da consultora (/looks/<id>) e pela tela do cliente (/meus_looks).
+
+    # O select aninhado faz os joins de uma vez só:
+    #   looks -> look_pecas -> pecas -> categoria   (peças do look)
+    #   looks -> look_categoria -> categoria_look  (categorias do look)
+    resposta = supabase_admin.table("looks").select(
+        "id_look, titulo, is_favorito, data, "
+        "look_pecas(pecas(id_peca, titulo, imagem, categoria(nome, parte_corpo))), "
+        "look_categoria(categoria_look(id_categoria_look, nome))"
+    ).eq("id_cliente", id_cliente).order("data", desc=True).execute()
+
+    # formata os dados em um JSON mais simples para o JavaScript
+    resultado = []
+    for look in resposta.data:
+        pecas = []
+        for ligacao in look.get("look_pecas") or []:
+            peca = ligacao.get("pecas")
+            if not peca:
+                continue
+            categoria = peca.get("categoria") or {}
+            pecas.append({
+                "id_peca": peca["id_peca"],
+                "titulo": peca["titulo"],
+                "imagem": peca["imagem"],
+                "categoria_nome": categoria.get("nome") or "Sem categoria",
+                "parte_corpo": categoria.get("parte_corpo")
+            })
+
+        categorias = [
+            ligacao["categoria_look"]
+            for ligacao in look.get("look_categoria") or []
+            if ligacao.get("categoria_look")
+        ]
+
+        resultado.append({
+            "id_look": look["id_look"],
+            "titulo": look["titulo"],
+            "is_favorito": look["is_favorito"],
+            "data": look["data"],
+            "pecas": pecas,
+            "categorias": categorias
+        })
+    return resultado
+
+@app.route("/looks/<int:id_cliente>")
+def looks(id_cliente):
+    # Tela da consultora: looks de qualquer cliente escolhido no menu lateral
     if "user_id" not in session:
         return jsonify([]), 401
 
     try:
-        # O select aninhado faz os joins de uma vez só:
-        #   looks -> look_pecas -> pecas -> categoria   (peças do look)
-        #   looks -> look_categoria -> categoria_look  (categorias do look)
-        resposta = supabase_admin.table("looks").select(
-            "id_look, titulo, is_favorito, data, "
-            "look_pecas(pecas(id_peca, titulo, imagem, categoria(nome, parte_corpo))), "
-            "look_categoria(categoria_look(id_categoria_look, nome))"
-        ).eq("id_cliente", id_cliente).order("data", desc=True).execute()
-
-        # formata os dados em um JSON mais simples para o JavaScript
-        resultado = []
-        for look in resposta.data:
-            pecas = []
-            for ligacao in look.get("look_pecas") or []:
-                peca = ligacao.get("pecas")
-                if not peca:
-                    continue
-                categoria = peca.get("categoria") or {}
-                pecas.append({
-                    "id_peca": peca["id_peca"],
-                    "titulo": peca["titulo"],
-                    "imagem": peca["imagem"],
-                    "categoria_nome": categoria.get("nome") or "Sem categoria",
-                    "parte_corpo": categoria.get("parte_corpo")
-                })
-
-            categorias = [
-                ligacao["categoria_look"]
-                for ligacao in look.get("look_categoria") or []
-                if ligacao.get("categoria_look")
-            ]
-
-            resultado.append({
-                "id_look": look["id_look"],
-                "titulo": look["titulo"],
-                "is_favorito": look["is_favorito"],
-                "pecas": pecas,
-                "categorias": categorias
-            })
-        return jsonify(resultado), 200
+        return jsonify(buscar_looks_do_cliente(id_cliente)), 200
     except Exception:
         app.logger.exception("Erro ao buscar looks")
         return jsonify([]), 500
+
+@app.route("/meus_looks")
+def meus_looks():
+    # Tela do cliente (feed): só os looks do próprio usuário logado.
+    # Não recebe id na URL de propósito, para um cliente não ver looks de outro.
+    if "user_id" not in session:
+        return jsonify([]), 401
+
+    try:
+        return jsonify(buscar_looks_do_cliente(id_usuario_logado())), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar os looks do cliente")
+        return jsonify([]), 500
+
+@app.route("/favoritar_look/<int:id_look>", methods=["POST"])
+def favoritar_look(id_look):
+    # Liga/desliga a estrela de favorito do look.
+    # Devolve o novo valor: {"is_favorito": true}
+    if "user_id" not in session:
+        return jsonify({"erro": "Não autorizado"}), 401
+
+    try:
+        resposta = supabase_admin.table("looks").select("id_cliente, is_favorito") \
+            .eq("id_look", id_look).single().execute()
+        look = resposta.data
+
+        # cliente só pode favoritar look dele; a consultora pode qualquer um
+        if not session.get("is_consultora") and look["id_cliente"] != id_usuario_logado():
+            return jsonify({"erro": "Não autorizado"}), 403
+
+        novo_valor = not look["is_favorito"]
+        supabase_admin.table("looks").update({"is_favorito": novo_valor}).eq("id_look", id_look).execute()
+        return jsonify({"is_favorito": novo_valor}), 200
+    except Exception:
+        app.logger.exception("Erro ao favoritar look")
+        return jsonify({"erro": "Erro ao favoritar o look."}), 500
 
 @app.route("/salvar_look", methods=["POST"])
 def salvar_look():
@@ -503,6 +546,8 @@ def notificacoes():
             pecas.sort(key=lambda p: (p.get("categoria") or {}).get("parte_corpo") or 9)
             resultado.append({
                 "id_notificacao": notif["id_notificacao"],
+                # usado para abrir o look no feed ao clicar na notificação
+                "id_look": look.get("id_look"),
                 "mensagem": notif["mensagem"],
                 "lida": notif["lida"],
                 "data": notif["data"],

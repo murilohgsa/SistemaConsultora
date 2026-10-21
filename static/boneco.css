@@ -1,0 +1,70 @@
+/* =====================================================================
+   BONECO DO LOOK (compartilhado) — usado no gerenciamento e no feed
+   ---------------------------------------------------------------------
+   Coluna central: cabeça, tronco, cintura e pés, de cima para baixo.
+   Coluna lateral: acessórios. As imagens usam object-fit: contain para a
+   peça aparecer inteira, e várias peças da mesma parte se sobrepõem um pouco.
+   O HTML é gerado pela função montarBoneco() em static/boneco.js.
+   ===================================================================== */
+.bonecoLook {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.corpoBoneco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.faixaBoneco {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.faixaBoneco img,
+.acessoriosBoneco img {
+  object-fit: contain;
+  border-radius: 10px;
+  background: #fff;
+  mix-blend-mode: multiply;   /* fundo branco das fotos some no fundo claro */
+  transition: transform .2s;
+}
+
+/* com várias peças na mesma parte, as fotos encolhem para caber na largura
+   do boneco (sem isso, duas peças de tronco passavam por cima dos acessórios) */
+.faixaBoneco img {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* peças da mesma parte ficam levemente sobrepostas */
+.faixaBoneco img + img { margin-left: -14px; }
+
+.faixaBoneco img:hover,
+.acessoriosBoneco img:hover {
+  transform: scale(1.06);
+  position: relative;
+  z-index: 1;
+}
+
+/* tamanho de cada parte, proporcional ao corpo */
+.faixaCabeca img   { height: 52px;  max-width: 64px; }
+.faixaTronco img   { height: 120px; max-width: 120px; }
+.faixaCintura img  { height: 120px; max-width: 110px; }
+.faixaPes img      { height: 54px;  max-width: 70px; }
+
+.acessoriosBoneco {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  flex: none;
+}
+
+.acessoriosBoneco img { width: 46px; height: 46px; }

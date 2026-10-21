@@ -79,14 +79,27 @@
   text-align: center;
 }
 
+/* cada notificação é um link para o look (o feed.css deixa links brancos; aqui volta ao preto) */
 .itemNotificacao {
   display: flex;
   gap: 12px;
   padding: 14px 18px;
   border-bottom: 1px solid #f1ede6;
+  color: var(--black);
+  text-decoration: none;
+  transition: background .2s;
 }
 
-.itemNotificacao:last-child { border-bottom: none; }
+.itemNotificacao:hover,
+.itemNotificacao:focus-visible { background: #faf8f4; }
+
+.listaNotificacoes li:last-child .itemNotificacao { border-bottom: none; }
+
+.mensagemNotificacao {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
 
 /* não lida: fundo de papel + bolinha na lateral */
 .itemNotificacao.naoLida {

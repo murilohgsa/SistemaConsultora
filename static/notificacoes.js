@@ -58,23 +58,38 @@ function renderizarNotificacoes(notificacoes) {
     // mostra até 4 fotos das peças do look; o resto vira "+N"
     const fotos = notif.imagens.slice(0, 4);
     const sobra = notif.imagens.length - fotos.length;
+    // cada notificação é um link para o look no feed (/feed?look=ID)
     return `
-      <li class="itemNotificacao ${notif.lida ? '' : 'naoLida'}">
-        <div class="fotosNotificacao" aria-hidden="true">
-          ${fotos.map(src => `<img src="${escaparTexto(src)}" alt="" loading="lazy">`).join('')}
-          ${sobra > 0 ? `<span class="maisFotos">+${sobra}</span>` : ''}
-        </div>
-        <div class="textoNotificacao">
-          <p>${escaparTexto(notif.mensagem)}</p>
-          ${notif.categorias.length ? `
-            <div class="tagsNotificacao">
-              ${notif.categorias.map(c => `<span>${escaparTexto(c)}</span>`).join('')}
-            </div>` : ''}
-          <time datetime="${escaparTexto(notif.data)}">${tempoRelativo(notif.data)}</time>
-        </div>
+      <li>
+        <a class="itemNotificacao ${notif.lida ? '' : 'naoLida'}"
+           href="/feed?look=${notif.id_look}" data-look="${notif.id_look}">
+          <span class="fotosNotificacao" aria-hidden="true">
+            ${fotos.map(src => `<img src="${escaparTexto(src)}" alt="" loading="lazy">`).join('')}
+            ${sobra > 0 ? `<span class="maisFotos">+${sobra}</span>` : ''}
+          </span>
+          <span class="textoNotificacao">
+            <span class="mensagemNotificacao">${escaparTexto(notif.mensagem)}</span>
+            ${notif.categorias.length ? `
+              <span class="tagsNotificacao">
+                ${notif.categorias.map(c => `<span>${escaparTexto(c)}</span>`).join('')}
+              </span>` : ''}
+            <time datetime="${escaparTexto(notif.data)}">${tempoRelativo(notif.data)}</time>
+          </span>
+        </a>
       </li>
     `;
   }).join('');
+
+  // No feed, abre o look ali mesmo (sem recarregar a página).
+  // Nas outras telas o link leva para /feed?look=ID, que abre o look ao carregar.
+  listaNotificacoes.querySelectorAll('.itemNotificacao').forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (typeof window.abrirLookCliente !== 'function') return;
+      e.preventDefault();
+      fecharPainelNotificacoes();
+      window.abrirLookCliente(Number(link.dataset.look));
+    });
+  });
 }
 
 // Mostra o aviso no canto da tela por alguns segundos
@@ -151,6 +166,7 @@ function iniciarNotificacoes() {
     e.stopPropagation();
     abrirPainelNotificacoes();
   });
+  avisoNovoLook.setAttribute('tabindex', '0');
 
   // clique dentro do painel não fecha; clique fora ou ESC fecha
   painelNotificacoes.addEventListener('click', (e) => e.stopPropagation());

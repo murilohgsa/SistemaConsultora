@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="/static/login.css">
 <link rel="stylesheet" href="/static/feed.css">
 <link rel="stylesheet" href="/static/notificacoes.css">
+<link rel="stylesheet" href="/static/boneco.css">
+<link rel="stylesheet" href="/static/looksCliente.css">
 </head>
 <body>
 
@@ -17,7 +19,8 @@
   <header class="barraCliente">
     <div class="nomeCliente">Isabela Andrade</div>
     <div class="acoesCliente">
-      <button class="botaoIcone" type="button" aria-label="Buscar looks">
+      <!-- lupa do topo: leva até o campo de busca do guarda-roupa -->
+      <button class="botaoIcone" id="btnBuscarLooks" type="button" aria-label="Buscar looks">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
       <button class="botaoAdicionar" type="button">
@@ -62,96 +65,53 @@
         <div class="tituloGuardaRoupa">
           <svg viewBox="0 0 24 24"><path d="M12 3a2 2 0 0 1 2 2c0 .9-.6 1.6-1.4 1.9L20 12.5c1 .6 1.6 1.6 1.6 2.7v.3H2.4v-.3c0-1.1.6-2.1 1.6-2.7l7.4-5.6C10.6 6.6 10 5.9 10 5a2 2 0 0 1 2-2Z"/><line x1="2.4" y1="18.5" x2="21.6" y2="18.5"/></svg>
           <h2 id="tituloGuardaRoupa">Guarda Roupa</h2>
+          <!-- quantidade de looks mostrados (preenchido pelo JS) -->
+          <span class="contagemLooks" id="contagemLooks"></span>
         </div>
 
-        <button class="pillFiltro" type="button" aria-haspopup="true">
-          <svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v6l-4-2v-4Z"/></svg>
-          Festa
-        </button>
+        <!-- busca pelo nome do look ou de uma peça -->
+        <label class="buscaLooks">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="buscaLooks" placeholder="Buscar look ou peça..." aria-label="Buscar look ou peça">
+        </label>
       </div>
 
-      <ul class="grade" role="list">
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 1">
-            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=600&auto=format&fit=crop" alt="Conjunto preto e branco com calça alfaiataria e regata" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="true" aria-label="Remover Look 1 dos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 1</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 2">
-            <img src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?q=80&w=600&auto=format&fit=crop" alt="Camisa azul clara e calça jeans wide leg" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="true" aria-label="Remover Look 2 dos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 2</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 3">
-            <img src="https://images.unsplash.com/photo-1520975954732-35dd22299614?q=80&w=600&auto=format&fit=crop" alt="Blazer cinza com camisa vermelha e calça clara" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="true" aria-label="Remover Look 3 dos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 3</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 4">
-            <img src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=600&auto=format&fit=crop" alt="Camisa azul marinho aberta e calça jeans" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 4 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 4</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 5">
-            <img src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?q=80&w=600&auto=format&fit=crop" alt="Vestido branco em ambiente à beira-mar" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 5 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 5</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 6">
-            <img src="https://images.unsplash.com/photo-1479064555552-3ef4979f8908?q=80&w=600&auto=format&fit=crop" alt="Composição de bota, bolsa e acessórios" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 6 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 6</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 7">
-            <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600&auto=format&fit=crop" alt="Look com óculos de sol e camiseta estampada" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 7 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 7</span>
-          </a>
-        </li>
-        <li>
-          <a class="cardLook" href="#" aria-label="Abrir Look 8">
-            <img src="https://images.unsplash.com/photo-1554568218-0f1715e72254?q=80&w=600&auto=format&fit=crop" alt="Camiseta branca estampada em fundo neutro" loading="lazy">
-            <button class="estrela" type="button" aria-pressed="false" aria-label="Adicionar Look 8 aos favoritos" onclick="event.preventDefault(); this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') !== 'true');">
-              <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.9-4.3 4.2 1 6-5.2-2.8-5.2 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg>
-            </button>
-            <span class="nomeLook">Look 8</span>
-          </a>
-        </li>
+      <!--
+        Filtros: "Todos", "Favoritos" e as categorias de look (Inverno, Festa...).
+        Só aparecem as categorias que os looks deste cliente usam.
+        Montado pelo static/looksCliente.js.
+      -->
+      <div class="filtrosLooks" id="filtrosLooks" role="toolbar" aria-label="Filtrar looks"></div>
+
+      <!-- looks criados pela consultora para este cliente (vêm de /meus_looks) -->
+      <ul class="grade" id="gradeLooks" role="list">
+        <li class="avisoLooks">Carregando seus looks...</li>
       </ul>
 
     </section>
   </main>
+
+  <!--
+    Detalhe do look: abre ao clicar num card (ou numa notificação).
+    Mostra o boneco grande, as categorias e a lista de peças por parte do corpo.
+  -->
+  <div class="modalDetalheLook" id="modalDetalheLook" role="dialog" aria-modal="true" aria-labelledby="tituloDetalheLook">
+    <div class="cartaoDetalheLook">
+      <button class="fecharDetalheLook" id="fecharDetalheLook" type="button" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <!-- conteúdo montado pelo static/looksCliente.js -->
+      <div id="conteudoDetalheLook"></div>
+    </div>
+  </div>
 
   <!-- aviso que aparece no canto quando a consultora cria um look novo -->
   <div class="avisoNovoLook" id="avisoNovoLook" role="status" hidden></div>
 
 </body>
 <script src="/static/script.js"></script>
+<!-- boneco.js antes do looksCliente.js, que usa o montarBoneco dele -->
+<script src="/static/boneco.js"></script>
+<script src="/static/looksCliente.js"></script>
 <script src="/static/notificacoes.js"></script>
 </html>
