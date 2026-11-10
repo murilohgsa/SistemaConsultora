@@ -1,53 +1,74 @@
+/* =====================================================================
+   ADICIONAR PEÇA (tela da cliente)
+   ---------------------------------------------------------------------
+   [NOVO VISUAL] Reescrito junto com a nova tela (estilo "Criar nova
+   publicação" do Instagram). Faz três coisas:
+     1. mostra a PRÉVIA da foto escolhida dentro da área da foto
+     2. permite ARRASTAR a foto do computador para a área da foto
+     3. confere o formulário antes de enviar e trava o botão durante o envio
+   ===================================================================== */
+
 const inputImagem = document.getElementById('imagemPeca');
-const textoImagem = document.getElementById('textoImagem');
-const botaoImagem = document.querySelector('.botaoImagem');
-const iconeImagem = document.querySelector('.iconeImagem');
-const form = document.getElementById('formAdicionarPecaCliente');
+const areaFoto = document.getElementById('areaFoto');
+const previaFoto = document.getElementById('previaFoto');
+const textoAreaFoto = document.getElementById('textoAreaFoto');
+const formPeca = document.getElementById('formAdicionarPecaCliente');
 const botaoEnviar = document.querySelector('.botaoEnviar');
+const msgPeca = document.getElementById('msgPeca');
 
-function iniciarSelecaoImagem() {
-  if (!inputImagem || !textoImagem || !botaoImagem) return;
+// 1. prévia da foto (FileReader lê o arquivo e vira uma imagem na tela)
+function mostrarPrevia() {
+  const arquivo = inputImagem.files[0];
+  if (!arquivo) {
+    previaFoto.hidden = true;
+    textoAreaFoto.hidden = false;
+    return;
+  }
+  const leitor = new FileReader();
+  leitor.onload = e => {
+    previaFoto.src = e.target.result;
+    previaFoto.hidden = false;
+    textoAreaFoto.hidden = true;
+  };
+  leitor.readAsDataURL(arquivo);
+}
 
-  inputImagem.addEventListener('change', () => {
-    if (inputImagem.files.length > 0) {
-      const arquivo = inputImagem.files[0];
-      textoImagem.textContent = arquivo.name;
-      botaoImagem.classList.add('selecionada');
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        iconeImagem.innerHTML=`<img src="${e.target.result}"style="width:46px;height:46px;object-fit:cover;border-radius:6px;" alt="preview">`;
-      };
-      
-      reader.readAsDataURL(arquivo);
-    } else {
-      textoImagem.textContent = 'Escolher imagem';
-      botaoImagem.classList.remove('selecionada');
-      iconeImagem.innerHTML = `<svg viewBox="0 0 24 24"> <rect x="3" y="3" width="18" height="18" rx="3"/> <circle cx="9" cy="9" r="1.6"/> <path d="M21 15l-5-5L5 21"/> </svg>`;
+// 2. arrastar a foto do computador para a área da foto
+function iniciarArrastarFoto() {
+  areaFoto.addEventListener('dragover', e => { e.preventDefault(); areaFoto.classList.add('sobre'); });
+  areaFoto.addEventListener('dragleave', () => areaFoto.classList.remove('sobre'));
+  areaFoto.addEventListener('drop', e => {
+    e.preventDefault();
+    areaFoto.classList.remove('sobre');
+    if (e.dataTransfer.files.length) {
+      inputImagem.files = e.dataTransfer.files;
+      mostrarPrevia();
     }
   });
 }
 
-function iniciarValidacaoForm(){
-  if (!form) return;
-  form.addEventListener('submit', (e) => {
-    const estacao = form.querySelector('input[name="estacao"]:checked'); 
-    const ocasiao = form.querySelector('input[name="ocasiao"]:checked');
-    const categoria = form.querySelector('select[name="id_categoria"]').value;
-    const titulo = form.querySelector('input[name="titulo"]').value.trim();
-    const imagem = inputImagem.files.length > 0;
+// 3. validação: mensagem na própria tela (antes era um alert())
+function iniciarValidacao() {
+  formPeca.addEventListener('submit', e => {
+    const faltando = [];
+    if (!inputImagem.files.length) faltando.push('a foto');
+    if (!formPeca.titulo.value.trim()) faltando.push('o título');
+    if (!formPeca.id_categoria.value) faltando.push('a categoria');
+    if (!formPeca.querySelector('input[name="estacao"]:checked')) faltando.push('a estação');
+    if (!formPeca.querySelector('input[name="ocasiao"]:checked')) faltando.push('a ocasião');
 
-    if (!titulo || !categoria || !estacao || !ocasiao || !imagem) {
+    if (faltando.length) {
       e.preventDefault();
-      alert('Preencha todos os campos antes de enviar.');
+      msgPeca.textContent = `Falta preencher: ${faltando.join(', ')}.`;
+      msgPeca.hidden = false;
       return;
     }
-
-    botaoEnviar.style.opacity = '0.5';
-    botaoEnviar.style.pointerEvents = 'none';
+    // trava o botão: o envio da foto pode demorar alguns segundos
+    botaoEnviar.disabled = true;
+    botaoEnviar.textContent = 'Enviando...';
   });
 }
 
-
-iniciarSelecaoImagem();
-iniciarValidacaoForm();
+inputImagem.addEventListener('change', mostrarPrevia);
+iniciarArrastarFoto();
+iniciarValidacao();

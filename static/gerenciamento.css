@@ -1,1951 +1,834 @@
-.mainGerenciamento{
-    display:flex;
-    grid-template-columns:none;
-    min-height:calc(100vh - 72px);
-    align-items:stretch;
-}
-
-/* ---------- barra superior ---------- */
-
-.barraTopo{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:20px 32px;
-    background:var(--black);
-    color:#fff;
-    gap:24px;
-    flex-wrap:wrap;
-}
-
-.marcaTopo{
-    font-family:'Bodoni Moda', serif;
-    font-size:1.3rem;
-    letter-spacing:0.02em;
-    white-space:nowrap;
-}
-
-.controlesTopo{
-    display:flex;
-    align-items:center;
-    gap:26px;
-    flex-wrap:wrap;
-}
-
-.linkFinanceiro{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    color:#f0ede8;
-    text-decoration:none;
-    font-family:'Jost', sans-serif;
-    font-size:0.85rem;
-    letter-spacing:0.02em;
-    padding-bottom:2px;
-    border-bottom:1px solid transparent;
-    transition:color .25s ease, border-color .25s ease;
-}
-
-.linkFinanceiro svg{
-    width:16px;
-    height:16px;
-    stroke:var(--accent);
-    fill:none;
-}
-
-.linkFinanceiro:hover,
-.linkFinanceiro:focus-visible{
-    color:#fff;
-    border-color:#fff;
-}
-
-.controleVisao{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-}
-
-.rotuloVisao{
-    font-family:'Jost', sans-serif;
-    font-size:0.85rem;
-    color:#f0ede8;
-    white-space:nowrap;
-}
-
-.alternador{
-    position:relative;
-    display:inline-block;
-    width:40px;
-    height:22px;
-    flex:none;
-}
-
-.alternador input{
-    position:absolute;
-    opacity:0;
-    width:100%;
-    height:100%;
-    margin:0;
-    cursor:pointer;
-}
-
-.trilhaAlternador{
-    position:absolute;
-    inset:0;
-    background:rgba(255,255,255,0.28);
-    border-radius:20px;
-    transition:background .25s ease;
-    pointer-events:none;
-}
-
-.trilhaAlternador::before{
-    content:'';
-    position:absolute;
-    top:2px;
-    left:2px;
-    width:18px;
-    height:18px;
-    border-radius:50%;
-    background:#fff;
-    transition:transform .25s ease;
-}
-
-.alternador input:checked + .trilhaAlternador{
-    background:var(--accent);
-}
-
-.alternador input:checked + .trilhaAlternador::before{
-    transform:translateX(18px);
-}
-
-.alternador input:focus-visible + .trilhaAlternador{
-    outline:2px solid var(--accent);
-    outline-offset:3px;
-}
-
-.botaoIcone{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    background:transparent;
-    border:none;
-    color:#f0ede8;
-    cursor:pointer;
-    padding:4px;
-    transition:color .25s ease, transform .2s ease;
-}
-
-.botaoIcone svg{
-    width:19px;
-    height:19px;
-    stroke:currentColor;
-    fill:none;
-}
-
-.botaoIcone:hover,
-.botaoIcone:focus-visible{
-    color:#fff;
-    transform:translateY(-1px);
-}
-
-.botaoNotificacao{
-    position:relative;
-}
-
-.contadorNotificacao{
-    position:absolute;
-    top:-4px;
-    right:-6px;
-    min-width:16px;
-    height:16px;
-    padding:0 3px;
-    border-radius:50%;
-    background:var(--accent);
-    color:var(--black);
-    font-size:0.62rem;
-    font-weight:600;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    line-height:1;
-}
-
-/* ---------- confirmação de logout ---------- */
-
-.modalSair{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(17,17,17,0.55);
-    align-items:center;
-    justify-content:center;
-    z-index:100;
-}
-
-.modalSair:target{
-    display:flex;
-}
-
-.cartaoSair{
-    background:#fff;
-    border-radius:18px;
-    padding:28px 30px;
-    max-width:320px;
-    width:90%;
-    text-align:center;
-    box-shadow:0 20px 40px rgba(17,17,17,0.2);
-}
-
-.cartaoSair p{
-    font-family:'Jost', sans-serif;
-    font-size:1rem;
-    font-weight:500;
-    color:var(--black);
-    margin-bottom:22px;
-}
-
-.botoesSair{
-    display:flex;
-    justify-content:center;
-    gap:14px;
-}
-
-.btnNaoSair,
-.btnSimSair{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:10px 26px;
-    border-radius:30px;
-    font-family:'Jost', sans-serif;
-    font-size:0.88rem;
-    font-weight:600;
-    text-decoration:none;
-    cursor:pointer;
-    transition:background .2s ease, color .2s ease;
-}
-
-.btnNaoSair{
-    background:#e9e5dc;
-    color:var(--black);
-}
-
-.btnNaoSair:hover{
-    background:#dcd7cb;
-}
-
-.btnSimSair{
-    background:#b6392f;
-    color:#fff;
-}
-
-.btnSimSair:hover{
-    background:#96271e;
-}
-
-/* foco visível geral */
-.botaoIcone:focus-visible,
-.itemCliente:focus-visible,
-.abaCliente:focus-visible,
-.linkFinanceiro:focus-visible,
-.setaCarrossel:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:3px;
-    border-radius:4px;
-}
-
-/* ---------- barra lateral de clientes ---------- */
-
-.listaClientes{
-    width:280px;
-    flex:none;
-    border-right:1px solid #e6e2da;
-    padding:26px 22px;
-    display:flex;
-    flex-direction:column;
-    background:var(--paper);
-}
-
-.cabecalhoClientes{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:22px;
-}
-
-.tituloClientes{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.tituloClientes svg{
-    width:20px;
-    height:20px;
-    stroke:var(--black);
-    fill:none;
-}
-
-.tituloClientes h2{
-    font-family:'Jost', sans-serif;
-    font-size:1.2rem;
-    font-weight:600;
-}
-
-.scrollClientes{
-    overflow-y:auto;
-    padding-right:6px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.scrollClientes::-webkit-scrollbar{
-    width:5px;
-}
-
-.scrollClientes::-webkit-scrollbar-track{
-    background:transparent;
-}
-
-.scrollClientes::-webkit-scrollbar-thumb{
-    background:var(--black);
-    border-radius:10px;
-}
-
-.scrollClientes{
-    scrollbar-width:thin;
-    scrollbar-color:var(--black) transparent;
-}
-
-.itemCliente{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    width:100%;
-    border:none;
-    border-radius:30px;
-    padding:9px 16px 9px 9px;
-    background:var(--black);
-    color:#fff;
-    font-family:'Jost', sans-serif;
-    font-size:0.92rem;
-    font-weight:500;
-    cursor:pointer;
-    text-align:left;
-    transition:background .25s ease, transform .2s ease;
-}
-
-.itemCliente img{
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    object-fit:cover;
-    flex:none;
-}
-
-.itemCliente:hover{
-    transform:translateX(2px);
-}
-
-.itemCliente[aria-current="true"]{
-    background:#d8d4cb;
-    color:var(--black);
-}
-
-.linhaCliente {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.linhaCliente .itemCliente {
-  flex: 1;
-}
-
-.btnOpcoes {
-  position: absolute;
-  right: 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  opacity: 0;
-  transition: opacity .2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.linhaCliente:hover .btnOpcoes {
-  opacity: 1;
-}
-
-.btnOpcoes svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-  stroke: none;
-}
-
-.itemCliente[aria-current="true"] ~ .btnOpcoes {
-  color: var(--black);
-}
-
-.btnOpcoes:not(.itemCliente[aria-current="true"] ~ .btnOpcoes) {
-  color: #fff;
-}
-
-.menuOpcoes {
-  position: fixed;
-  background: var(--black);
-  border-radius: 12px;
-  padding: 6px;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-  z-index: 200;
-  min-width: 120px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-
-.menuOpcoes.aberto { display: flex; }
-
-.opcaoMenu {
-  background: transparent;
-  border: none;
-  color: #f7f4ef;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-align: left;
-  cursor: pointer;
-  transition: background .2s;
-}
-
-.opcaoMenu:hover { background: rgba(255,255,255,0.1); }
-
-.opcaoExcluir { color: #f87171; }
-.opcaoExcluir:hover { background: rgba(248,113,113,0.15); }
-
-/* modal de confirmação */
-.modalConfirmacao {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-}
-
-.modalConfirmacao.aberto { display: flex; }
-
-.cartaoConfirmacao {
-  background: var(--black);
-  border-radius: 18px;
-  padding: 28px 28px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 320px;
-  width: 90%;
-}
-
-.cartaoConfirmacao p {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.95rem;
-  color: #f7f4ef;
-  line-height: 1.5;
-}
-
-.botoesConfirmacao {
-  display: flex;
-  gap: 10px;
-}
-
-.btnSim {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  background: #f87171;
-  color: #fff;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity .2s;
-}
-
-.btnSim:hover { opacity: .85; }
-
-.btnNao {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: transparent;
-  color: #f7f4ef;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .2s;
-}
-
-.btnNao:hover { background: rgba(255,255,255,0.08); }
-
-/* ---------- conteúdo do cliente ---------- */
-
-.conteudoCliente{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    min-width:0;
-}
-
-.cabecalhoCliente{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    padding:24px 36px 18px;
-}
-
-.cabecalhoCliente img{
-    width:38px;
-    height:38px;
-    border-radius:50%;
-    object-fit:cover;
-}
-
-.cabecalhoCliente h1{
-    font-family:'Jost', sans-serif;
-    font-size:1.25rem;
-    font-weight:600;
-}
-
-.abasCliente{
-    display:flex;
-    gap:36px;
-    padding:0 36px;
-    border-bottom:1px solid #e6e2da;
-    overflow-x:auto;
-}
-
-.abaCliente{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    background:none;
-    border:none;
-    padding:14px 2px;
-    font-family:'Jost', sans-serif;
-    font-size:0.88rem;
-    font-weight:500;
-    color:var(--muted);
-    cursor:pointer;
-    white-space:nowrap;
-    border-bottom:2px solid transparent;
-    margin-bottom:-1px;
-    transition:color .25s ease, border-color .25s ease;
-}
-
-.abaCliente svg{
-    width:16px;
-    height:16px;
-    stroke:currentColor;
-    fill:none;
-}
-
-.abaCliente:hover{
-    color:var(--black);
-}
-
-.abaCliente[aria-selected="true"]{
-    color:var(--black);
-    border-color:var(--black);
-}
-
-.painelGraficos{
-    padding:32px 36px 48px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:24px;
-}
-
-.cartaoGrafico{
-    border-radius:20px;
-    padding:22px 24px;
-    min-height:250px;
-    display:flex;
-    flex-direction:column;
-}
-
-.cartaoGrafico h3{
-    font-family:'Jost', sans-serif;
-    font-size:1rem;
-    font-weight:600;
-}
-
-.tomLaranja{ background:#AF8F72; color:#000; }
-.tomAzul{ background:#AF8F72; color:#000; }
-.tomRosa{ background:#AF8F72; color:#000; }
-
-.espacoGrafico{
-    flex:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin-top:14px;
-    border:1.5px dashed rgba(0,0,0,0.18);
-    border-radius:14px;
-}
-
-.tomAzul .espacoGrafico,
-.tomRosa .espacoGrafico{
-    border-color:rgba(255,255,255,0.35);
-}
-
-.avisoGrafico{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    text-align:center;
-    padding:12px;
-}
-
-.avisoGrafico svg{
-    width:26px;
-    height:26px;
-    stroke:currentColor;
-    fill:none;
-    opacity:0.7;
-}
-
-.avisoGrafico span{
-    font-family:'Jost', sans-serif;
-    font-size:0.8rem;
-    font-weight:400;
-    opacity:0.8;
-}
-
-/* cartão de looks favoritos: carrossel de miniaturas */
-
-.carrosselFavoritos{
-    position:relative;
-    flex:1;
-    margin-top:14px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    overflow-x:auto;
-    scroll-snap-type:x mandatory;
-    border-radius:14px;
-}
-
-.carrosselFavoritos::-webkit-scrollbar{
-    display:none;
-}
-
-.carrosselFavoritos img{
-    scroll-snap-align:start;
-    flex:none;
-    width:96px;
-    height:100%;
-    min-height:150px;
-    object-fit:cover;
-    border-radius:12px;
-}
-
-.setaCarrossel{
-    position:absolute;
-    right:8px;
-    top:50%;
-    transform:translateY(-50%);
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    border:none;
-    background:rgba(17,17,17,0.55);
-    color:#fff;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    transition:background .25s ease;
-}
-
-.setaCarrossel svg{
-    width:16px;
-    height:16px;
-    stroke:currentColor;
-    fill:none;
-}
-
-.setaCarrossel:hover{
-    background:rgba(17,17,17,0.8);
-}
-
-/* ---------- balão de login ---------- */
-
-.cabecalhoClientes { position: relative; }
-
-.balaoLogin {
-  position: absolute;
-  top: 38px;
-  right: 0;
-  width: 248px;
-  background: var(--black);
-  border-radius: 18px;
-  padding: 22px 20px 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+/* =====================================================================
+   GERENCIAMENTO (tela da consultora) — layout "clean" estilo Instagram
+   ---------------------------------------------------------------------
+   [NOVO VISUAL] Reescrito do zero. As cores e fontes são as ORIGINAIS do
+   sistema (variáveis do static/tema.css, carregado antes deste arquivo).
+   Do Instagram vem a ESTRUTURA:
+     1. barra superior branca com logo, busca e ícones
+     2. "stories" (círculos) com os clientes
+     3. cabeçalho do perfil: foto grande, nome, botões e números
+     4. "destaques" (círculos menores) com as partes do corpo
+     5. abas com ícone e texto em caixa alta, com a linha EM CIMA da aba ativa
+     6. grade de fotos quadradas, 3 por linha, com camada escura no hover
+     7. "publicação" aberta: foto à esquerda, informações à direita
+   No fim do arquivo ficam os ajustes para celular.
+   ===================================================================== */
+
+
+/* =====================================================================
+   1. BARRA SUPERIOR
+   ===================================================================== */
+.barraTopo {
+  position: sticky;
+  top: 0;
   z-index: 100;
-  display: none;
-  flex-direction: column;
-  gap: 14px;
+  background: var(--branco);
+  border-bottom: 1px solid var(--linha);
 }
-
-.balaoLogin.aberto { display: flex; }
-
-/* seta decorativa apontando pro botão */
-.balaoLogin::before {
-  content: '';
-  position: absolute;
-  top: -7px;
-  right: 14px;
-  width: 14px;
-  height: 14px;
-  background: var(--black);
-  transform: rotate(45deg);
-  border-radius: 2px;
-}
-
-.balaoTitulo {
-  font-family: 'Bodoni Moda', serif;
-  font-size: 1.05rem;
-  color: #f7f4ef;
-  letter-spacing: 0.01em;
-}
-
-.balaoSubtitulo {
-  font-size: 0.75rem;
-  color: rgba(240,237,232,0.5);
-  margin-top: -6px;
-}
-
-.campoCadastro {
+.conteudoBarra {
+  max-width: 975px;
+  margin: 0 auto;
+  height: 60px;
+  padding: 0 20px;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  gap: 20px;
+}
+.logo {
+  font-family: var(--fonteTitulo);
+  font-size: 1.55rem;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+.buscaTopo { width: 268px; margin-left: auto; }
+.acoesTopo { display: flex; align-items: center; gap: 4px; }
+
+
+/* =====================================================================
+   PÁGINA (coluna central com largura máxima, como o perfil do Instagram)
+   ===================================================================== */
+.paginaPerfil {
+  max-width: 975px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
 }
 
-.campoCadastro label {
-  font-size: 0.72rem;
-  color: rgba(240,237,232,0.6);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+
+/* =====================================================================
+   2. STORIES (clientes) + filtro de clientes
+   ===================================================================== */
+.areaStories {
+  padding: 18px 0 8px;
+  border-bottom: 1px solid var(--linha);
 }
 
-.campoCadastro input {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  color: #f7f4ef;
-  outline: none;
-  transition: border-color .2s;
-  width: 100%;
-}
-
-.campoCadastro input::placeholder { color: rgba(240,237,232,0.28); }
-.campoCadastro input:focus { border-color: var(--accent); }
-
-.campoCheck {
-  flex-direction: row;
+.filtrosClientes {
+  display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 14px;
 }
-
-.campoCheck input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent);
-  cursor: pointer;
-  flex: none;
-}
-
-.campoCheck label {
-  font-size: 0.82rem;
-  text-transform: none;
-  letter-spacing: 0;
-  cursor: pointer;
-}
-
-.msgRetorno {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.78rem;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.msgRetorno.sucesso {
-  background: rgba(74, 222, 128, 0.15);
-  color: #4ade80;
-}
-
-.msgRetorno.erro {
-  background: rgba(248, 113, 113, 0.15);
-  color: #f87171;
-}
-
-.botaoCadastrar {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent);
-  color: var(--black);
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: 0.02em;
-  transition: opacity .2s, transform .15s;
-  margin-top: 2px;
-}
-
-.botaoCadastrar:hover  { opacity: .85; }
-.botaoCadastrar:active { transform: scale(.98); }
-.botaoCadastrar:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-
-/*---aba peças---*/
-
-/* ---------- painel de peças ---------- */
-
-.painelPecas {
-  padding: 32px 36px 48px;
+.chipsClientes {
   display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.grupoPecas {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.tituloCategoria {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--black);
-  letter-spacing: 0.02em;
-}
-
-.carrosselPecas {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  gap: 8px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 6px;
-  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 2px;
 }
+.campoPequeno { height: 32px; font-size: .8rem; width: auto; }
+#ordenarClientes { flex: none; }
 
-.carrosselPecas::-webkit-scrollbar { display: none; }
-.carrosselPecas { scrollbar-width: none; }
+/* fileira horizontal de círculos, com rolagem lateral */
+.stories {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 10px;
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.stories li { flex: none; scroll-snap-align: start; }
 
-.cardPeca {
-  flex: none;
-  width: 140px;
+.story {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  scroll-snap-align: start;
+  align-items: center;
+  gap: 6px;
+  width: 76px;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
+  color: var(--preto);
 }
 
-.cardPeca .imagemPeca {
-  width: 140px;
-  height: 180px;
-  border-radius: 14px;
-  object-fit: cover;
-  background: #e6e2da;
-  transition: transform .3s ease;
-}
-
-.cardPeca:hover .imagemPeca {
-  transform: scale(1.03);
-}
-
-.cardPeca .tituloPeca {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--black);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.setaCarrosselPecas {
-  flex: none;
-  width: 34px;
-  height: 34px;
+/* anel do story: degradê nos tons originais (bege -> marrom -> preto).
+   Só aparece em quem já tem looks (como story "não visto"). */
+.anelStory {
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  border: none;
-  background: var(--black);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .2s;
+  padding: 3px;
+  background: linear-gradient(45deg, #d9c6ad, var(--destaque) 55%, var(--preto));
+  transition: transform var(--transicao);
 }
+.anelStory.semAnel { background: var(--linhaForte); padding: 1.5px; }
+.story:hover .anelStory { transform: scale(1.04); }
 
-.setaCarrosselPecas svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-}
-
-.setaCarrosselPecas:hover { background: #333; }
-
-.carregandoPecas {
+/* foto com a borda branca entre a foto e o anel */
+.fotoStory {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  color: var(--muted);
-}
-
-.semPecas {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  color: var(--muted);
-  padding: 48px;
-  text-align: center;
-}
-
-/* ---------- cabeçalho peças ---------- */
-
-.cabecalhoPecas {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 24px 36px 0;
-}
-
-.botaoAdicionarPeca {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--black);
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  padding: 10px 20px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity .2s;
-}
-
-.botaoAdicionarPeca svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-}
-
-.botaoAdicionarPeca:hover { opacity: .85; }
-
-/* ---------- balão adicionar peça ---------- */
-
-.balaoAdicionarPeca {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 680px;
-  max-width: 90vw;
-  background: var(--black);
-  border-radius: 18px;
-  padding: 28px 32px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
-  z-index: 300;
-  display: none;
-  flex-direction: column;
-  gap: 16px;
-  max-height: 75vh;
-  overflow-y: auto;
-}
-
-.balaoAdicionarPeca.aberto { display: flex; }
-
-.balaoAdicionarPeca::before {
-    display: none;
-}
-
-.balaoAdicionarPeca::-webkit-scrollbar { width: 4px; }
-.balaoAdicionarPeca::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-
-/* grupo de radio */
-.grupoRadio {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.opcaoRadio {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.opcaoRadio input[type="radio"] {
-  display: none;
-}
-
-.opcaoRadio span {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.2);
-  font-family: 'Jost', sans-serif;
-  font-size: 0.78rem;
-  color: rgba(240,237,232,0.7);
-  transition: background .2s, color .2s, border-color .2s;
-}
-
-.opcaoRadio input[type="radio"]:checked + span {
-  background: var(--accent);
-  color: var(--black);
-  border-color: var(--accent);
-  font-weight: 600;
-}
-
-.opcaoRadio span:hover {
-  border-color: rgba(255,255,255,0.5);
-  color: #fff;
-}
-
-/* select e textarea no balão */
-.balaoAdicionarPeca select,
-.balaoAdicionarPeca textarea {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  color: #f7f4ef;
-  outline: none;
-  width: 100%;
-  transition: border-color .2s;
-}
-
-.balaoAdicionarPeca select option {
-  background: var(--black);
-  color: #f7f4ef;
-}
-
-.balaoAdicionarPeca select:focus,
-.balaoAdicionarPeca textarea:focus {
-  border-color: var(--accent);
-}
-
-.balaoAdicionarPeca textarea {
-  resize: none;
-}
-
-/* input file */
-.balaoAdicionarPeca input[type="file"] {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.82rem;
-  color: rgba(240,237,232,0.7);
-  width: 100%;
-  cursor: pointer;
-}
-
-.overlayAdicionarPeca {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 299;
-  display: none;
-}
-
-.overlayAdicionarPeca.aberto { display: block; }
-
-.balaoAdicionarPeca form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.balaoAdicionarPeca .campoCadastro.larguraTotal {
-  grid-column: 1 / -1;
-}
-
-.balaoAdicionarPeca button[type="submit"] {
-  grid-column: 1 / -1;
-}
-
-.wrapperCarrossel {
-  position: relative;
-}
-
-.imagemPecaWrapper {
-  position: relative;
-  width: 140px;
-  height: 180px;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.imagemPecaWrapper .imagemPeca {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--papel);
+  overflow: hidden;
+  background: var(--campoFundo);
+}
+.fotoStory img { width: 100%; height: 100%; object-fit: cover; }
+.iconeNovo svg { width: 26px; height: 26px; fill: none; stroke: var(--preto); stroke-width: 1.6; stroke-linecap: round; }
+
+.nomeStory {
+  max-width: 100%;
+  font-size: .74rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.btnExcluirPeca {
+/* cliente selecionado: nome em negrito e um pontinho embaixo */
+.itemCliente[aria-current="true"] .nomeStory { font-weight: 600; }
+.itemCliente[aria-current="true"] .anelStory { box-shadow: 0 0 0 2px var(--papel), 0 0 0 3.5px var(--preto); }
+
+.semClientes { margin: 4px 0 12px; color: var(--cinza); font-size: .86rem; }
+
+
+/* =====================================================================
+   3. CABEÇALHO DO PERFIL
+   ===================================================================== */
+.cabecalhoPerfil {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  align-items: center;
+  padding: 34px 0 28px;
+}
+.fotoPerfilGrande {
+  justify-self: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--campoFundo);
+  border: 1px solid var(--linha);
+}
+.fotoPerfilGrande img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.infoPerfil { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+.linhaNome { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
+.linhaNome h1 {
+  margin: 0;
+  font-family: var(--fonteTitulo);
+  font-size: 1.6rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.botoesPerfil { display: flex; align-items: center; gap: 8px; }
+.botaoMais { width: 34px; height: 34px; }
+.botaoMais svg { fill: currentColor; }
+
+/* números: "12 peças · 4 looks · 2 favoritos" */
+.numerosPerfil {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 40px;
+  font-size: .98rem;
+}
+.numerosPerfil strong { font-weight: 600; }
+
+.bioPerfil { display: flex; flex-direction: column; gap: 2px; font-size: .9rem; }
+.emailPerfil { font-weight: 600; }
+.dicaPerfil { color: var(--cinza); }
+
+
+/* =====================================================================
+   4. DESTAQUES (partes do corpo)
+   ===================================================================== */
+.destaques {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 36px;
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  padding-left: 18px;
+}
+.destaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 84px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--preto);
+}
+.circuloDestaque {
+  width: 77px;
+  height: 77px;
+  border-radius: 50%;
+  border: 1px solid var(--linhaForte);
+  padding: 3px;
+  background: var(--papel);
+  display: flex;
+  overflow: hidden;
+  transition: border-color var(--transicao);
+}
+.circuloDestaque img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--branco);
+}
+.iconeDestaque {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--campoFundo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.iconeDestaque svg { width: 28px; height: 28px; fill: none; stroke: var(--cinza); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.nomeDestaque { font-size: .74rem; font-weight: 600; text-align: center; line-height: 1.2; }
+.destaque:hover .circuloDestaque { border-color: var(--cinzaClaro); }
+/* destaque ativo (filtrando as peças): borda preta mais grossa */
+.destaque.ativo .circuloDestaque { border: 2px solid var(--preto); padding: 2px; }
+
+
+/* =====================================================================
+   5. ABAS (linha em cima da aba ativa, igual ao Instagram)
+   ===================================================================== */
+.abasPerfil {
+  display: flex;
+  justify-content: center;
+  gap: 56px;
+  border-top: 1px solid var(--linha);
+}
+.abaPerfil {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 52px;
+  padding: 0;
+  margin-top: -1px;            /* a linha da aba "cobre" a linha de cima */
+  border: 0;
+  border-top: 1px solid transparent;
+  background: none;
+  color: var(--cinza);
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.abaPerfil svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.abaPerfil:hover { color: var(--preto); }
+.abaPerfil[aria-selected="true"] { color: var(--preto); border-top-color: var(--preto); }
+
+
+/* =====================================================================
+   FILTROS (barra discreta acima da grade)
+   ===================================================================== */
+.barraFiltros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+.buscaFiltro { flex: 1 1 240px; min-width: 0; }
+.buscaFiltro .campo { height: 32px; font-size: .82rem; }
+
+.linhaContagem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  margin-bottom: 4px;
+  font-size: .8rem;
+  color: var(--cinza);
+}
+.linhaContagem .botao { height: 28px; }
+
+
+/* =====================================================================
+   6. GRADE DE FOTOS (3 colunas quadradas, espaço fino entre elas)
+   ===================================================================== */
+.gradeFotos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+/* estado vazio e dicas ocupam a linha inteira da grade */
+.gradeFotos > .estadoVazio,
+.gradeFotos > .dicaVazia { grid-column: 1 / -1; }
+
+.tileFoto {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: var(--branco);
+  cursor: pointer;
+}
+.tileFoto > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* tile de look: a colagem do look (boneco.css) ocupa o quadrado inteiro */
+.tileLook { background: var(--branco); }
+.bonecoTile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+/* ícone no canto (estrela de favorito), como o ícone de "carrossel" do Instagram */
+.marcaTile {
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(17,17,17,0.65);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .2s, opacity .2s;
-  z-index: 2;
-  opacity: 0;  /* esconde por padrão */
-}
-
-.imagemPecaWrapper:hover .btnExcluirPeca {
-  opacity: 1;  /* aparece no hover */
-}
-
-.btnExcluirPeca svg {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  fill: none;
-}
-
-.btnExcluirPeca:hover {
-  background: #f87171;
-}
-
-.setaCarrosselPecas {
-  position: absolute;
-  top: 90px;
-  transform: translateY(-50%);
-  z-index: 3;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: var(--black);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .2s, visibility .2s;
-  visibility: hidden;
-}
-
-.setaCarrosselPecas svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-}
-
-.setaCarrosselPecas:hover { background: #333; }
-
-.setaEsquerda { left: -12px; }
-.setaDireitra { right: -12px;}
-
-.wrapperCarrossel .setaEsquerda {
-  left: 8px;
-  right: auto;
-}
-
-.wrapperCarrossel .setaDireita {
-  right: 8px;
-  left: auto;
-}
-
-.modalConfirmacaoPeca {
-  position: fixed;
-  inset: 0;
-  background: rgba(17,17,17,0.55);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-}
-
-.modalConfirmacaoPeca.aberto { display: flex; }
-
-.modalConfirmacaoPeca .cartaoConfirmacao {
-  background: #fff;
-  border-radius: 18px;
-  padding: 28px 30px;
-  max-width: 320px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 20px 40px rgba(17,17,17,0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.modalConfirmacaoPeca .cartaoConfirmacao p {
-  font-family: 'Jost', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--black);
-}
-
-.modalConfirmacaoPeca .botoesConfirmacao {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-}
-
-.modalConfirmacaoPeca .btnNao {
-  background: #e9e5dc;
-  color: var(--black);
-  border: none;
-  border-radius: 30px;
-  padding: 10px 26px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .2s;
-}
-
-.modalConfirmacaoPeca .btnNao:hover { background: #dcd7cb; }
-
-.modalConfirmacaoPeca .btnSim {
-  background: #b6392f;
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  padding: 10px 26px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .2s;
-}
-
-.modalConfirmacaoPeca .btnSim:hover { background: #96271e; }
-
-/* ---------- aba looks ---------- */
-
-.painelLooks {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  height: calc(100vh - 200px);
-  overflow: hidden;
-}
-
-.colunaSilhueta {
-  border-right: 1px solid #e6e2da;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 16px;
-}
-
-.silhuetaWrapper {
-  position: relative;
-  width: 180px;
-  flex: 1;
-}
-
-.silhueta {
-  width: 100%;
-  height: auto;
-}
-
-.pontoCampo {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--black);
-  border: 2px solid #fff;
-  cursor: pointer;
-  box-shadow: 0 0 0 2px var(--black);
-  transition: transform .2s, background .2s;
-}
-
-.pontoCampo:hover {
-  transform: translate(-50%, -50%) scale(1.3);
-  background: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
-}
-
-.tooltipPonto {
-  position: absolute;
-  left: 22px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--black);
-  color: #fff;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.72rem;
-  padding: 4px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s;
-}
-
-.pontoCampo:hover .tooltipPonto { opacity: 1; }
-
-.botaoSalvarLook {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  background: #3bb54a;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity .2s;
-  margin-top: 16px;
-}
-
-.botaoSalvarLook svg {
   width: 22px;
   height: 22px;
-  stroke: currentColor;
-  fill: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35));
 }
+.marcaTile svg { width: 100%; height: 100%; fill: var(--branco); stroke: var(--branco); stroke-width: 1.4; stroke-linejoin: round; }
 
-.botaoSalvarLook:hover { opacity: .85; }
-
-/* coluna direita */
-
-.colunaLook {
-  padding: 24px 32px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.regiaoVazia {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  color: var(--muted);
-  text-align: center;
-}
-
-.grupoRegiao {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.tituloRegiao {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--black);
-  text-transform: capitalize;
-}
-
-.pecasSelecionadasRegiao {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.cardPecaSelecionada {
-  position: relative;
-  width: 100px;
-  cursor: pointer;
-}
-
-.cardPecaSelecionada img {
-  width: 100px;
-  height: 130px;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.cardPecaSelecionada .removerPeca {
+/* camada escura com nome e categoria ao passar o mouse */
+.camadaTile {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(17,17,17,0.65);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity .2s;
-}
-
-.cardPecaSelecionada:hover .removerPeca { opacity: 1; }
-
-.cardPecaSelecionada .removerPeca svg {
-  width: 12px;
-  height: 12px;
-  stroke: currentColor;
-  fill: none;
-}
-
-/* modal selecionar peça */
-
-.modalSelecionarPeca {
-  position: fixed;
   inset: 0;
-  background: rgba(17,17,17,0.55);
-  display: none;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 400;
-}
-
-.modalSelecionarPeca.aberto { display: flex; }
-
-.cartaoSelecionarPeca {
-  background: #fff;
-  border-radius: 18px;
-  padding: 24px;
-  width: 520px;
-  max-width: 90vw;
-  max-height: 70vh;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.cabecalhoModalPeca {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.tituloModalPeca {
-  font-family: 'Jost', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--black);
-}
-
-.fecharModalPeca {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  padding: 4px;
-}
-
-.fecharModalPeca svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--black);
-  fill: none;
-}
-
-.listaPecasModal {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  overflow-y: auto;
-}
-
-.cardPecaModal {
-  width: 100px;
-  cursor: pointer;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  transition: border-color .2s;
-}
-
-.cardPecaModal:hover { border-color: var(--accent); }
-.cardPecaModal.selecionada { border-color: var(--black); }
-
-.cardPecaModal img {
-  width: 100px;
-  height: 130px;
-  object-fit: cover;
-}
-
-.cardPecaModal span {
-  display: block;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.75rem;
-  padding: 4px 6px;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(17, 17, 17, .38);
+  color: var(--branco);
   text-align: center;
-  color: var(--black);
+  font-size: .85rem;
+  opacity: 0;
+  transition: opacity var(--transicao);
 }
+.camadaTile strong { font-weight: 600; font-size: .95rem; }
+.tileFoto:hover .camadaTile,
+.tileFoto:focus-visible .camadaTile { opacity: 1; }
 
-/* ======================================================================
-   LOOKS: categorias, silhueta, montagem do boneco e galeria
-   ====================================================================== */
-
-/* ---------- botão secundário (Categorias / Adicionar) ---------- */
-/* mesmo formato do botão "Adicionar Peça", só que com contorno */
-.cabecalhoPecas { gap: 10px; }
-
-.botaoSecundario {
-  background: transparent;
-  color: var(--black);
-  box-shadow: inset 0 0 0 1px var(--black);
-}
-
-/* ---------- balão de categorias de peça ---------- */
-.balaoCategorias { width: 520px; }
-
-/* aqui o form é uma coluna só (o do "Nova Peça" é em 2 colunas) */
-.balaoCategorias form { grid-template-columns: 1fr; }
-
-.listaCategorias {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-  padding-top: 16px;
-}
-
-.grupoCategoriaParte {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  align-items: start;
-  gap: 10px;
-}
-
-.nomeParteCategoria {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
+.tituloGrade {
+  margin: 22px 0 12px;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  color: rgba(240,237,232,0.6);
-  padding-top: 4px;
+  color: var(--cinza);
 }
+.dicaVazia { margin: 8px 0 16px; color: var(--cinza); font-size: .85rem; }
 
-/* chips usados na lista de categorias e nos cards de look */
-.chipsCategoria {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+
+/* =====================================================================
+   MONTAR LOOK (closet | provador | novo look)
+   ===================================================================== */
+.estudioLook {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+  padding-top: 8px;
 }
-
-.chipCategoria {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.72rem;
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.1);
-  color: #f7f4ef;
+.closet,
+.palcoManequim,
+.resumoLook {
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  padding: 16px;
+  min-width: 0;
 }
-
-.chipCategoria.vazio { opacity: .4; }
-
-/* ---------- silhueta: contador nas bolinhas ---------- */
-.pontoCampo.preenchido {
-  background: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent);
-}
-
-/* número de peças escolhidas naquela parte do corpo */
-.contadorPonto {
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 10px;
-  background: var(--black);
-  color: #fff;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 600;
-  line-height: 18px;
-  text-align: center;
-  pointer-events: none;
-}
-
-/* "balança" a silhueta quando tenta salvar um look vazio */
-.silhuetaWrapper.balancar { animation: balancar .4s; }
-
-@keyframes balancar {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
-}
-
-/* ---------- coluna direita: seções ---------- */
-.secaoLook {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.cabecalhoSecaoLook {
+.cabecalhoColuna {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
+.cabecalhoColuna h2 { margin: 0; font-size: .95rem; font-weight: 600; }
+.contagemColuna { font-size: .78rem; color: var(--cinza); }
 
-.tituloSecaoLook {
-  font-family: 'Bodoni Moda', serif;
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: var(--black);
-}
+/* ---- closet ---- */
+.closet { position: sticky; top: 76px; transition: border-color var(--transicao), background var(--transicao); }
+.closet .campoBusca .campo { height: 34px; font-size: .82rem; }
+.filtrosCloset { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+.filtrosCloset .campo { width: 100%; padding-right: 26px; background-position: right 6px center; }
+.dicaCloset { margin: 0 0 10px; font-size: .74rem; color: var(--cinzaClaro); }
 
-.botaoLimparLook {
-  background: transparent;
-  border: none;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.8rem;
-  color: var(--muted);
-  text-decoration: underline;
-  cursor: pointer;
-}
+/* enquanto arrasta uma peça DO manequim, o closet indica que aceita soltar */
+.closet.soltarAqui { border: 1.5px dashed var(--destaque); background: var(--destaqueFundo); }
 
-.botaoLimparLook:hover { color: var(--black); }
-
-.filtroLooks {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.8rem;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #e6e2da;
-  background: #fff;
-  color: var(--black);
-  cursor: pointer;
-}
-
-/* look em montagem: boneco à esquerda + lista por parte à direita */
-.montagemLook {
-  display: flex;
-  gap: 28px;
-  align-items: flex-start;
-  min-height: 160px;
-}
-
-.montagemLook .regiaoVazia {
-  width: 100%;
-  min-height: 160px;
-  border: 1px dashed #d8d3ca;
-  border-radius: 18px;
-}
-
-.previaBoneco {
-  flex: none;
-  width: 240px;
-  background: #fff;
-  border: 1px solid #ece8e1;
-  border-radius: 18px;
-  padding: 18px;
-}
-
-.listaPartesLook {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* o X de remover fica sempre visível em telas de toque */
-@media (hover: none) {
-  .cardPecaSelecionada .removerPeca { opacity: 1; }
-}
-
-/* ---------- galeria de looks criados ---------- */
-.galeriaLooks {
+.gradeCloset {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 18px;
-  padding-bottom: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  max-height: 520px;
+  overflow-y: auto;
 }
+.gradeCloset > .dicaVazia { grid-column: 1 / -1; }
 
-.galeriaLooks .semPecas { grid-column: 1 / -1; padding: 32px; }
-
-.cardLook {
-  background: #fff;
-  border: 1px solid #ece8e1;
-  border-radius: 18px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow .2s, transform .2s;
-}
-
-.cardLook:hover {
-  box-shadow: 0 10px 28px rgba(17,17,17,0.08);
-  transform: translateY(-2px);
-}
-
-/* fundo do boneco no card: tom de papel, igual ao resto do sistema */
-.fundoCardLook {
+.pecaCloset {
   position: relative;
-  background: var(--paper);
-  padding: 18px 14px;
-  min-height: 260px;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--papel);
+  cursor: grab;
+}
+.pecaCloset:active { cursor: grabbing; }
+.pecaCloset img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.nomePecaCloset {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 14px 5px 4px;
+  background: linear-gradient(transparent, rgba(17, 17, 17, .6));
+  color: var(--branco);
+  font-size: .64rem;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity var(--transicao);
+}
+.pecaCloset:hover .nomePecaCloset { opacity: 1; }
+
+/* peça já no look: fica clarinha e ganha um "check" (como selecionar fotos no Instagram) */
+.marcaNoLook {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--branco);
+  background: rgba(17, 17, 17, .15);
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.marcaNoLook svg { width: 12px; height: 12px; fill: none; stroke: var(--branco); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+/* o círculo vazio só aparece ao passar o mouse; marcado, fica sempre visível */
+.pecaCloset:not(.noLook) .marcaNoLook { opacity: 0; transition: opacity var(--transicao); }
+.pecaCloset:hover .marcaNoLook { opacity: 1; }
+.pecaCloset.noLook img { opacity: .45; }
+.pecaCloset.noLook .marcaNoLook { background: var(--preto); border-color: var(--preto); }
+.pecaCloset.noLook .marcaNoLook svg { opacity: 1; }
 
-/* boneco um pouco menor dentro do card */
-.cardLook .faixaTronco img,
-.cardLook .faixaCintura img { height: 96px; max-width: 96px; }
-.cardLook .faixaCabeca img  { height: 42px; }
-.cardLook .faixaPes img     { height: 44px; }
-.cardLook .acessoriosBoneco img { width: 38px; height: 38px; }
-
-/* lixeira do look aparece ao passar o mouse (reaproveita .btnExcluirPeca) */
-.btnExcluirLook {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-.cardLook:hover .btnExcluirLook,
-.btnExcluirLook:focus-visible { opacity: 1; }
-
-@media (hover: none) {
-  .btnExcluirLook { opacity: 1; }
-}
-
-.infoCardLook {
-  padding: 12px 14px 14px;
+/* ---- provador (manequim) ---- */
+.palcoManequim { overflow: hidden; }
+.palcoManequim .areaManequim { overflow: hidden; }   /* a luz atrás do manequim não pode criar rolagem lateral */
+.areaManequim {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  padding: 8px 4px 4px;
+  min-height: 560px;
+  border-radius: var(--raioPequeno);
+  background: var(--papel);
 }
 
-.tituloCardLook {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--black);
-}
-
-.qtdPecasLook {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-/* chips em fundo claro (dentro do card) */
-.infoCardLook .chipCategoria {
-  background: #f1ede6;
-  color: var(--black);
-}
-
-/* ---------- modais claros (escolher peça / salvar look) ---------- */
-.subtituloModalPeca {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.75rem;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
-.cardPecaModal {
-  background: transparent;
-  padding: 0;
-  font: inherit;
-  position: relative;
-}
-
-.cardPecaModal small {
-  display: block;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.68rem;
-  color: var(--muted);
-  text-align: center;
-  padding-bottom: 6px;
-}
-
-/* check preto no canto da peça marcada */
-.cardPecaModal.selecionada::after {
-  content: "✓";
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 22px;
-  height: 22px;
+/* ---- novo look ---- */
+.listaResumoLook { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; }
+.listaResumoLook .dicaVazia { margin: 0; }
+.grupoResumo { display: flex; flex-direction: column; gap: 6px; }
+.linhaResumo { display: flex; align-items: center; gap: 10px; }
+.linhaResumo img {
+  width: 40px; height: 40px;
   border-radius: 50%;
-  background: var(--black);
-  color: #fff;
-  font-size: 0.75rem;
-  line-height: 22px;
-  text-align: center;
+  object-fit: cover;
+  border: 1px solid var(--linha);
+  background: var(--papel);
+  flex: none;
 }
+.textoResumo { display: flex; flex-direction: column; min-width: 0; flex: 1; font-size: .84rem; }
+.textoResumo strong { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.textoResumo small { color: var(--cinza); font-size: .74rem; }
+.botaoRemover { height: 28px; font-size: .78rem; }
 
-.avisoModalPeca {
-  font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  color: var(--muted);
-  line-height: 1.5;
-  padding: 24px 8px;
-  text-align: center;
-  width: 100%;
-}
-
-/* os .campoCadastro foram feitos para fundo preto; aqui o fundo é branco */
-.cartaoSelecionarPeca .campoCadastro label { color: var(--muted); }
-
-.cartaoSelecionarPeca input[type="text"] {
-  background: #fff;
-  border: 1px solid #e6e2da;
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.85rem;
-  color: var(--black);
-  outline: none;
-  width: 100%;
-}
-
-.cartaoSelecionarPeca input[type="text"]:focus { border-color: var(--accent); }
-.cartaoSelecionarPeca input[type="text"]::placeholder { color: #b4ada3; }
-
-.cartaoSelecionarPeca .msgRetorno.erro { color: #c0392b; background: rgba(192,57,43,0.08); }
-
-.chipsCategoriaLook {
+.formSalvarLook {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linha);
 }
-
-/* os chips ficam dentro de .campoCadastro, cujo label é maiúsculo; aqui volta ao normal */
-.chipCategoriaLook { cursor: pointer; text-transform: none; letter-spacing: normal; }
-.chipCategoriaLook input { display: none; }
-
+.chipsCategoriaLook { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipCategoriaLook input { position: absolute; opacity: 0; pointer-events: none; }
 .chipCategoriaLook span {
   display: inline-flex;
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid #e6e2da;
-  font-family: 'Jost', sans-serif;
-  font-size: 0.8rem;
-  color: var(--black);
-  transition: background .2s, border-color .2s;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--raioPequeno);
+  background: var(--campoFundo);
+  font-size: .78rem;
+  cursor: pointer;
+  transition: background var(--transicao), color var(--transicao);
 }
+.chipCategoriaLook input:checked + span { background: var(--preto); color: var(--branco); }
+.chipCategoriaLook input:focus-visible + span { outline: 2px solid var(--destaque); outline-offset: 2px; }
+.novaCategoriaLook { display: flex; gap: 6px; }
+.novaCategoriaLook .campo { flex: 1; min-width: 0; }
+.novaCategoriaLook .botao { height: 32px; }
+.botaoSalvar { width: 100%; height: 38px; }
 
-.chipCategoriaLook span:hover { border-color: var(--black); }
 
-.chipCategoriaLook input:checked + span {
-  background: var(--black);
-  border-color: var(--black);
-  color: #fff;
+/* =====================================================================
+   RESUMO (sem gráficos: barras finas e miniaturas)
+   ===================================================================== */
+.gradeResumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 8px;
 }
+.cartaoResumo {
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  padding: 20px;
+  min-width: 0;
+}
+.cartaoResumo h2 { margin: 0 0 14px; font-size: .95rem; font-weight: 600; }
+.cartaoLargo { grid-column: 1 / -1; }
 
-.novaCategoriaLook {
+.listaBarras { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.listaBarras li {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  font-size: .84rem;
+}
+.trilhaBarra { height: 6px; border-radius: 3px; background: var(--campoFundo); overflow: hidden; }
+.preenchimentoBarra { display: block; height: 100%; border-radius: 3px; background: var(--destaque); transition: width .4s ease; }
+.valorBarra { text-align: right; font-weight: 600; }
+
+.textoResumoSimples { margin: 0 0 12px; color: var(--cinza); font-size: .86rem; }
+.miniaturas { display: flex; flex-wrap: wrap; gap: 8px; }
+.miniatura {
+  width: 64px; height: 64px;
+  padding: 0;
+  border: 1px solid var(--linha);
+  border-radius: var(--raioPequeno);
+  overflow: hidden;
+  background: var(--papel);
+  cursor: pointer;
+}
+.miniatura img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.emBreve { background: var(--papel); border-style: dashed; }
+.emBreve p { margin: 0; color: var(--cinza); font-size: .86rem; }
+
+
+/* =====================================================================
+   7. PUBLICAÇÃO ABERTA (detalhe de peça ou look)
+   ===================================================================== */
+.fecharPost {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--branco);
+  cursor: pointer;
+}
+.fecharPost svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.cartaoPost {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr);
+  width: min(920px, 100%);
+  max-height: calc(100vh - 48px);
+  background: var(--branco);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.midiaPost {
+  aspect-ratio: 1 / 1;
+  background: var(--papel);
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.midiaPost > img { width: 100%; height: 100%; object-fit: contain; background: var(--branco); }
+.midiaLook { background: var(--branco); padding: 16px; }
+
+.ladoPost {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-left: 1px solid var(--linha);
+}
+.autorPost {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--linha);
+  font-size: .88rem;
+}
+.fotoAutor { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--campoFundo); flex: none; }
+.fotoAutor img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.textoPost { flex: 1; overflow-y: auto; padding: 16px; }
+.textoPost h2 { margin: 0 0 14px; font-family: var(--fonteTitulo); font-size: 1.35rem; font-weight: 500; }
+
+.dadosPost {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  margin: 0;
+  font-size: .86rem;
+}
+.dadosPost dt { color: var(--cinza); }
+.dadosPost dd { margin: 0; font-weight: 500; }
+.obsPost { margin: 16px 0 0; font-size: .86rem; line-height: 1.5; white-space: pre-line; }
+
+.chipsPost { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.pecasPost { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pecasPost li { display: flex; align-items: center; gap: 10px; font-size: .84rem; }
+.pecasPost img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--linha); flex: none; }
+.pecasPost span { display: flex; flex-direction: column; min-width: 0; }
+.pecasPost small { color: var(--cinza); }
+
+/* fileira de ícones de ação (como curtir / comentar / salvar) */
+.acoesPost {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px 0;
+  border-top: 1px solid var(--linha);
+}
+.acoesPost .botaoIcone svg { width: 24px; height: 24px; }
+.acoesPost .favoritado svg { fill: var(--estrela); stroke: var(--estrela); }
+.acoesPost .botaoExcluirPost { margin-left: auto; }
+.acoesPost .botaoExcluirPost:hover { color: var(--erro); }
+.dataPost {
+  padding: 4px 16px 14px;
+  font-size: .7rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--cinzaClaro);
 }
 
-.novaCategoriaLook .botaoAdicionarPeca { flex: none; }
-/* ---------- responsividade ---------- */
 
-@media (max-width:1100px){
-    .painelGraficos{grid-template-columns:1fr;}
-    /* look em montagem: boneco em cima e lista embaixo */
-    .montagemLook{flex-direction:column;}
+/* =====================================================================
+   OUTROS MODAIS
+   ===================================================================== */
+.primeiroSemLinha > *:first-child { border-top: 0; }
+
+.formModal { display: flex; flex-direction: column; gap: 10px; }
+.botaoLargo { width: 100%; height: 38px; }
+.campoCheck { display: flex; align-items: center; gap: 8px; font-size: .86rem; color: var(--cinza); cursor: pointer; }
+.campoCheck input { width: 16px; height: 16px; accent-color: var(--preto); }
+
+/* opções de rádio como "pílulas" (estação, ocasião, parte do corpo) */
+.grupoCampo { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.grupoRadio { display: flex; flex-wrap: wrap; gap: 6px; }
+.opcaoRadio input { position: absolute; opacity: 0; pointer-events: none; }
+.opcaoRadio span {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--raioPequeno);
+  border: 1px solid var(--linha);
+  font-size: .8rem;
+  cursor: pointer;
+  transition: background var(--transicao), color var(--transicao), border-color var(--transicao);
+}
+.opcaoRadio span:hover { border-color: var(--cinzaClaro); }
+.opcaoRadio input:checked + span { background: var(--preto); border-color: var(--preto); color: var(--branco); }
+.opcaoRadio input:focus-visible + span { outline: 2px solid var(--destaque); outline-offset: 2px; }
+
+/* nova peça: foto à esquerda, campos à direita (como "Criar publicação") */
+.cartaoModalLargo { width: min(860px, 100%); }
+.cartaoModalMedio { width: min(520px, 100%); }
+.msgModal { margin: 12px 16px 0; }
+.formPeca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.areaFoto {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--papel);
+  border-right: 1px solid var(--linha);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background var(--transicao);
+}
+.areaFoto.sobre { background: var(--destaqueFundo); }
+.areaFoto input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.areaFoto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: var(--branco); pointer-events: none; }
+.textoAreaFoto { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; font-size: 1.05rem; pointer-events: none; }
+.textoAreaFoto svg { width: 64px; height: 64px; fill: none; stroke: var(--preto); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.colunaCampos { display: flex; flex-direction: column; gap: 14px; padding: 18px; overflow-y: auto; }
+
+.listaCategorias { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--linha); }
+.grupoCategoriaParte { display: flex; flex-direction: column; gap: 6px; }
+.chipsCategoria { display: flex; flex-wrap: wrap; gap: 6px; }
+.etiqueta.vazio { background: transparent; color: var(--cinzaClaro); padding: 0; }
+
+
+
+/* =====================================================================
+   [NOVO] ANÚNCIOS (roupas para comprar) — janela da consultora
+   ===================================================================== */
+.linhaDupla { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.listaAnunciosArea { border-top: 1px solid var(--linha); }
+.listaAnuncios { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.listaAnuncios li { display: flex; align-items: center; gap: 12px; font-size: .86rem; }
+.listaAnuncios li.pausado { opacity: .5; }
+.listaAnuncios img { width: 48px; height: 48px; border-radius: var(--raioPequeno); object-fit: cover; border: 1px solid var(--linha); flex: none; }
+.textoAnuncio { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.textoAnuncio strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.textoAnuncio small { color: var(--cinza); }
+.listaAnuncios .botao { height: 30px; padding: 0 10px; font-size: .78rem; }
+.listaAnuncios .excluirAnuncio { color: var(--erro); }
+
+
+/* =====================================================================
+   CELULAR E TABLET
+   ===================================================================== */
+@media (max-width: 1000px) {
+  .estudioLook { grid-template-columns: 240px minmax(0, 1fr); }
+  .resumoLook { grid-column: 1 / -1; }
 }
 
-@media (max-width:700px){
-    /* aba looks: silhueta em cima e looks embaixo, com rolagem da página */
-    .painelLooks{grid-template-columns:1fr; height:auto; overflow:visible;}
-    .colunaSilhueta{border-right:none; border-bottom:1px solid #e6e2da;}
-    .silhuetaWrapper{height:420px; flex:none;}
-    .colunaLook{padding:20px 16px;}
-    .previaBoneco{width:100%;}
-}
+@media (max-width: 735px) {
+  .conteudoBarra { padding: 0 12px; gap: 8px; }
+  .logo { font-size: 1.25rem; }
+  .buscaTopo { width: auto; flex: 1; min-width: 0; }
+  .paginaPerfil { padding: 0 0 60px; }
+  .areaStories, .cabecalhoPerfil, .destaques, .barraFiltros, .linhaContagem, .tituloGrade, .dicaVazia { padding-left: 14px; padding-right: 14px; }
+  .tituloGrade { margin-left: 0; }
 
-@media (max-width:900px){
-    .mainGerenciamento{flex-direction:column;}
-    .listaClientes{
-        width:100%;
-        border-right:none;
-        border-bottom:1px solid #e6e2da;
-    }
-    .scrollClientes{
-        flex-direction:row;
-        overflow-x:auto;
-        overflow-y:visible;
-        padding-bottom:6px;
-    }
-    .itemCliente{width:auto;}
-    .barraTopo{padding:18px 22px;}
-    .cabecalhoCliente,
-    .abasCliente,
-    .painelGraficos{padding-left:22px; padding-right:22px;}
-}
+  .filtrosClientes { flex-direction: column; align-items: stretch; }
+  #ordenarClientes { align-self: flex-start; }
+  .stories { gap: 12px; }
 
-@media (max-width:560px){
-    .controlesTopo{gap:16px;}
-    .rotuloVisao{display:none;}
-    .marcaTopo{font-size:1.1rem;}
-    .painelGraficos{padding:24px 18px 36px; gap:16px;}
-    .cartaoGrafico{min-height:210px; padding:18px;}
-}
+  /* perfil: foto menor ao lado do nome, números em linha embaixo */
+  .cabecalhoPerfil { grid-template-columns: 86px minmax(0, 1fr); gap: 20px; padding: 18px 14px; }
+  .fotoPerfilGrande { width: 80px; height: 80px; }
+  .infoPerfil { gap: 12px; }
+  .linhaNome h1 { font-size: 1.25rem; }
+  .botoesPerfil { gap: 6px; }
+  .botoesPerfil .botao { padding: 0 10px; font-size: .8rem; }
+  .numerosPerfil { gap: 18px; font-size: .86rem; }
 
-@media (prefers-reduced-motion: reduce){
-    .itemCliente, .abaCliente, .botaoIcone, .linkFinanceiro, .setaCarrossel, .trilhaAlternador, .trilhaAlternador::before{
-        transition:none;
-    }
+  .destaques { gap: 14px; padding-bottom: 20px; }
+  .destaque { width: 66px; }
+  .circuloDestaque { width: 60px; height: 60px; }
+
+  /* abas: só os ícones (texto escondido), como no app do Instagram */
+  .abasPerfil { gap: 0; justify-content: space-around; }
+  .abaPerfil { flex: 1; justify-content: center; }
+  .abaPerfil span { display: none; }
+  .abaPerfil svg { width: 22px; height: 22px; stroke-width: 1.6; }
+  .abaPerfil[aria-selected="true"] { border-top-width: 1.5px; }
+
+  .gradeFotos { gap: 2px; }
+  .camadaTile { display: none; }   /* no toque não existe "hover" */
+
+  .barraFiltros { flex-wrap: nowrap; overflow-x: auto; }
+  .buscaFiltro { flex: 0 0 200px; }
+  .barraFiltros > * { flex-shrink: 0; }
+
+  .estudioLook { grid-template-columns: minmax(0, 1fr); padding: 8px 10px 0; }
+  .closet { position: static; }
+  .gradeCloset { grid-template-columns: repeat(4, minmax(0, 1fr)); max-height: 260px; }
+  .areaManequim { min-height: 0; }
+
+  .gradeResumo { grid-template-columns: minmax(0, 1fr); padding: 8px 10px 0; }
+  .listaBarras li { grid-template-columns: 96px minmax(0, 1fr) 24px; }
+
+  /* publicação aberta: foto em cima, informações embaixo */
+  .modal { padding: 0; }
+  .cartaoPost { grid-template-columns: minmax(0, 1fr); max-height: 100vh; overflow-y: auto; border-radius: 0; height: 100%; align-content: start; }
+  .ladoPost { border-left: 0; }
+  .autorPost { order: -1; }
+  .fecharPost { z-index: 2; color: var(--preto); top: 6px; right: 6px; }
+
+  .formPeca { grid-template-columns: minmax(0, 1fr); }
+  .areaFoto { border-right: 0; border-bottom: 1px solid var(--linha); aspect-ratio: 4 / 3; }
+  .cartaoModal { max-height: 100vh; }
 }

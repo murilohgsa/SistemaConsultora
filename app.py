@@ -1,4 +1,5 @@
 import os
+from functools import wraps
 from flask import Flask, request, redirect, url_for, render_template, flash, session, jsonify
 from dotenv import load_dotenv
 from supabase import create_client, Client
@@ -30,7 +31,49 @@ cloudinary.config(
 
 # --- 2. Configuração do Flask ---
 app = Flask(__name__)
-app.secret_key = "chave_secreta_super_segura_aqui"  # Necessário para as mensagens flash e sessão
+# [REVISÃO] Antes a chave secreta ficava escrita direto no código. Quem tivesse acesso
+# ao repositório conseguiria forjar o cookie de sessão (e se passar pela consultora).
+# Agora ela vem do .env (FLASK_SECRET_KEY). O valor fixo só é usado como reserva para
+# o sistema não parar de funcionar em desenvolvimento enquanto a variável não é criada.
+app.secret_key = os.getenv("FLASK_SECRET_KEY") or "chave_secreta_super_segura_aqui"
+
+
+# --- Proteção das rotas -------------------------------------------------------
+# [REVISÃO] Antes cada rota só conferia "user_id in session". Isso deixava um CLIENTE
+# logado chamar rotas da consultora pelo navegador (ex.: /pecas/<id> de outra cliente,
+# /excluir_cliente/<id>, /salvar_look). Os dois decoradores abaixo centralizam a regra:
+#   @login_obrigatorio  -> qualquer usuário logado
+#   @somente_consultora -> só quem tem is_consultora = True
+# Se a requisição for de API (fetch), devolvem JSON com o código HTTP certo;
+# se for uma página, redirecionam para o login.
+
+def _quer_json():
+    # O navegador, ao abrir uma PÁGINA, manda "text/html" no cabeçalho Accept.
+    # O fetch() do JavaScript manda "*/*". Assim sabemos se respondemos JSON ou redirect.
+    return "text/html" not in request.headers.get("Accept", "")
+
+
+def login_obrigatorio(rota):
+    @wraps(rota)
+    def verificar(*args, **kwargs):
+        if "user_id" not in session:
+            if _quer_json():
+                return jsonify({"erro": "Não autorizado"}), 401
+            return redirect(url_for("login"))
+        return rota(*args, **kwargs)
+    return verificar
+
+
+def somente_consultora(rota):
+    @wraps(rota)
+    @login_obrigatorio
+    def verificar(*args, **kwargs):
+        if not session.get("is_consultora"):
+            if _quer_json():
+                return jsonify({"erro": "Acesso permitido só para a consultora"}), 403
+            return redirect(url_for("feed"))
+        return rota(*args, **kwargs)
+    return verificar
 
 # Rota inicial redireciona para a tela de login
 @app.route("/")
@@ -91,48 +134,75 @@ def login():
 # --- 3. Telas após o Login ---
 
 @app.route("/gerenciamento")
+@somente_consultora
 def gerenciamento():
-    # Proteção: se não tiver logado, manda pro login de volta
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
+    # [REVISÃO] Antes qualquer usuário logado (inclusive cliente) abria esta tela.
+    # Agora o @somente_consultora manda o cliente de volta para o feed dele.
     try:
         resposta = supabase_admin.table("usuario") \
-            .select("id_usuario, nome, email, foto_perfil") \
+            .select("id_usuario, nome, email, foto_perfil, data") \
             .eq("is_consultora", False) \
+            .order("nome") \
             .execute()
-        clientes = resposta.data
+        clientes = resposta.data or []
     except Exception:
+        app.logger.exception("Erro ao buscar clientes")
         clientes = []
+
+    # [NOVO] Resumo de cada cliente para o FILTRO DE CLIENTES do menu lateral.
+    # Com estes números a consultora consegue filtrar "com looks", "sem peças",
+    # ordenar por "mais peças" etc. sem precisar abrir cliente por cliente.
+    # São só 2 consultas (todas as peças e todos os looks, apenas as colunas
+    # necessárias) e a contagem é feita aqui no Python, então a tela continua rápida.
+    resumo = {c["id_usuario"]: {"qtd_pecas": 0, "qtd_looks": 0, "qtd_favoritos": 0} for c in clientes}
+    try:
+        for peca in supabase_admin.table("pecas").select("id_cliente").execute().data or []:
+            if peca["id_cliente"] in resumo:
+                resumo[peca["id_cliente"]]["qtd_pecas"] += 1
+        for look in supabase_admin.table("looks").select("id_cliente, is_favorito").execute().data or []:
+            if look["id_cliente"] in resumo:
+                resumo[look["id_cliente"]]["qtd_looks"] += 1
+                if look.get("is_favorito"):
+                    resumo[look["id_cliente"]]["qtd_favoritos"] += 1
+    except Exception:
+        # se a contagem falhar, a tela abre do mesmo jeito (só com os números zerados)
+        app.logger.exception("Erro ao montar o resumo dos clientes")
+
+    for cliente in clientes:
+        cliente.update(resumo[cliente["id_usuario"]])
+
     return render_template("gerenciamento.html", clientes=clientes)
 
 
-@app.route("/feed") 
+@app.route("/feed")
+@login_obrigatorio
 def feed():
-    # Proteção: se não tiver logado, manda pro login de volta
-    if "user_id" not in session:
-        return redirect(url_for("login"))
     #pega a foto do cliente para o perfil ou pega uma aleatória
     try:
         perfil = supabase_admin.table("usuario").select("nome", "foto_perfil").eq("auth_user_id", session["user_id"]).single().execute()
         cliente = perfil.data
     except Exception:
-        cliente = {"nome": "", "foto_perfil.jpg": None}
+        # [REVISÃO] a chave estava escrita "foto_perfil.jpg"; o template lê "foto_perfil"
+        cliente = {"nome": "", "foto_perfil": None}
 
     return render_template("feed.html", cliente=cliente)
 
 @app.route("/logout")
 def logout():
     # Limpa a sessão e sai do Supabase
-    session.pop("user_id", None)
-    supabase.auth.sign_out()
+    # [REVISÃO] antes só o "user_id" era removido e o "is_consultora" ficava guardado
+    # no cookie. session.clear() apaga tudo, para o próximo login começar limpo.
+    session.clear()
+    try:
+        supabase.auth.sign_out()
+    except Exception:
+        # se o Supabase estiver fora do ar, a pessoa sai do sistema mesmo assim
+        app.logger.exception("Erro ao sair do Supabase")
     return redirect(url_for("login"))
 
 @app.route("/perfil")
+@login_obrigatorio
 def perfil():
-    # Proteção: se não tiver logado, manda pro login de volta
-    if "user_id" not in session:
-        return redirect(url_for("login"))
     try:
         resposta = supabase_admin.table("usuario").select("*").eq("auth_user_id", session["user_id"]).single().execute()
         cliente = resposta.data
@@ -144,9 +214,9 @@ def perfil():
 # cadastro do cliente
 
 @app.route("/cadastrar", methods=["POST"])
+@somente_consultora
 def cadastrar():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
+    # [REVISÃO] só a consultora pode cadastrar novos usuários
     nome = request.form.get("nome", "").strip()
     email = request.form.get("email", "").strip()
     senha = request.form.get("senha", "")
@@ -181,11 +251,10 @@ def cadastrar():
     return redirect(url_for("gerenciamento"))
 
 @app.route("/excluir_cliente/<int:id_cliente>", methods=["POST"])
-
+@somente_consultora
 def excluir_cliente(id_cliente):
-    if "user_id" not in session:
-        return redirect(url_for("login")), 401
-
+    # [REVISÃO] antes devolvia "redirect(...), 401" (um redirect com código 401 não
+    # funciona). Agora o decorador cuida disso e só a consultora pode excluir.
     try:
         resposta = supabase_admin.table("usuario") \
             .select("auth_user_id") \
@@ -207,41 +276,67 @@ def excluir_cliente(id_cliente):
         return "", 500
 
 
+def buscar_pecas_do_cliente(id_cliente):
+    # [NOVO] Busca as peças de um cliente já no formato que o JavaScript usa.
+    # Antes este código ficava dentro da rota /pecas/<id>. Agora é uma função
+    # porque também é usado pela rota nova /minhas_pecas (aba PEÇAS da cliente).
+    #
+    # categoria(id_categoria, nome, parte_corpo) faz o "join" com a tabela categoria
+    # e já traz a parte do corpo (1 cabeça, 2 tronco, 3 cintura, 4 pés, 5 acessório).
+    # observacoes e data também vêm, porque os FILTROS DE PEÇA pesquisam no texto
+    # das observações e ordenam por "mais recentes".
+    resposta = supabase_admin.table("pecas").select(
+        "id_peca, titulo, imagem, estacao, ocasiao, observacoes, is_favorito, data, "
+        "categoria(id_categoria, nome, parte_corpo)"
+    ).eq("id_cliente", id_cliente).order("data", desc=True).execute()
+
+    resultado = []
+    for peca in resposta.data:
+        categoria = peca.get("categoria") or {}
+        resultado.append({
+            "id_peca": peca["id_peca"],
+            "titulo": peca["titulo"],
+            "imagem": peca["imagem"],
+            "estacao": peca["estacao"],
+            "ocasiao": peca["ocasiao"],
+            "is_favorito": peca["is_favorito"],
+            "observacoes": peca.get("observacoes") or "",
+            "data": peca.get("data"),
+            "id_categoria": categoria.get("id_categoria"),
+            "categoria_nome": categoria.get("nome") or "Sem categoria",
+            # usado para saber em qual parte do manequim a peça encaixa
+            "parte_corpo": categoria.get("parte_corpo")
+        })
+    return resultado
+
+
 @app.route("/pecas/<int:id_cliente>")
+@somente_consultora
 def pecas(id_cliente):
-    if "user_id" not in session:
-        return jsonify([]), 401
-
+    # [REVISÃO] antes um cliente logado conseguia ver as peças de OUTRO cliente só
+    # trocando o número na URL. Agora apenas a consultora acessa esta rota.
     try:
-        # categoria(nome, parte_corpo) faz o "join" com a tabela categoria e já traz
-        # a parte do corpo (1 cabeça, 2 tronco, 3 cintura, 4 pés, 5 acessório)
-        resposta = supabase_admin.table("pecas").select("id_peca, titulo, imagem, estacao, ocasiao, is_favorito, categoria(nome, parte_corpo)").eq("id_cliente", id_cliente).execute()
-
-        #formata os dados
-        resultado = []
-        for peca in resposta.data:
-            categoria = peca.get("categoria") or {}
-            resultado.append({
-                "id_peca": peca["id_peca"],
-                "titulo": peca["titulo"],
-                "imagem": peca["imagem"],
-                "estacao": peca["estacao"],
-                "ocasiao": peca["ocasiao"],
-                "is_favorito": peca["is_favorito"],
-                "categoria_nome": categoria.get("nome") or "Sem categoria",
-                # usado na aba de looks para filtrar as peças de cada bolinha da silhueta
-                "parte_corpo": categoria.get("parte_corpo")
-            })
-        return jsonify(resultado), 200
+        return jsonify(buscar_pecas_do_cliente(id_cliente)), 200
     except Exception:
         app.logger.exception("Erro ao buscar pecas")
         return jsonify([]), 500
 
-@app.route("/categorias")
-def categorias():
-    if "user_id" not in session:
-        return jsonify([]), 401
 
+@app.route("/minhas_pecas")
+@login_obrigatorio
+def minhas_pecas():
+    # [NOVO] Peças da cliente LOGADA (aba PEÇAS do feed da cliente).
+    # Igual ao /meus_looks: não recebe id na URL de propósito, assim uma
+    # cliente nunca consegue ver o guarda-roupa de outra.
+    try:
+        return jsonify(buscar_pecas_do_cliente(id_usuario_logado())), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar as peças da cliente")
+        return jsonify([]), 500
+
+@app.route("/categorias")
+@login_obrigatorio
+def categorias():
     try:
         # parte_corpo diz em qual bolinha da silhueta as peças dessa categoria aparecem
         resposta = supabase_admin.table("categoria").select("id_categoria, nome, parte_corpo").order("nome").execute()
@@ -257,12 +352,11 @@ def categorias():
 PARTES_CORPO = {1: "Cabeça", 2: "Tronco", 3: "Cintura", 4: "Pés", 5: "Acessório"}
 
 @app.route("/adicionar_categoria", methods=["POST"])
+@somente_consultora
 def adicionar_categoria():
     # Cadastra uma nova categoria de PEÇA (ex.: "Brinco") já ligada a uma parte do corpo.
     # Recebe JSON: {"nome": "Brinco", "parte_corpo": 5}
     # Devolve a categoria criada em JSON, para o JavaScript já colocar ela nos selects.
-    if "user_id" not in session:
-        return jsonify({"erro": "Não autorizado"}), 401
 
     dados = request.get_json(silent=True) or {}
     nome = (dados.get("nome") or "").strip()
@@ -295,11 +389,9 @@ def adicionar_categoria():
 # --- 5. Categorias de look (Inverno, Verão, Festa, Casamento...) ---
 
 @app.route("/categorias_look")
+@login_obrigatorio
 def categorias_look():
     # Lista as categorias do LOOK inteiro (não confundir com categoria da peça)
-    if "user_id" not in session:
-        return jsonify([]), 401
-
     try:
         resposta = supabase_admin.table("categoria_look").select("id_categoria_look, nome").order("nome").execute()
         return jsonify(resposta.data), 200
@@ -308,11 +400,9 @@ def categorias_look():
         return jsonify([]), 500
 
 @app.route("/adicionar_categoria_look", methods=["POST"])
+@somente_consultora
 def adicionar_categoria_look():
     # Cadastra uma nova categoria de look. Recebe JSON: {"nome": "Formatura"}
-    if "user_id" not in session:
-        return jsonify({"erro": "Não autorizado"}), 401
-
     dados = request.get_json(silent=True) or {}
     nome = (dados.get("nome") or "").strip()
     if not nome:
@@ -379,11 +469,10 @@ def buscar_looks_do_cliente(id_cliente):
     return resultado
 
 @app.route("/looks/<int:id_cliente>")
+@somente_consultora
 def looks(id_cliente):
     # Tela da consultora: looks de qualquer cliente escolhido no menu lateral
-    if "user_id" not in session:
-        return jsonify([]), 401
-
+    # [REVISÃO] protegida com @somente_consultora (antes um cliente via looks de outro)
     try:
         return jsonify(buscar_looks_do_cliente(id_cliente)), 200
     except Exception:
@@ -427,6 +516,7 @@ def favoritar_look(id_look):
         return jsonify({"erro": "Erro ao favoritar o look."}), 500
 
 @app.route("/salvar_look", methods=["POST"])
+@somente_consultora
 def salvar_look():
     # Salva um look novo. Recebe JSON:
     # {
@@ -435,15 +525,18 @@ def salvar_look():
     #   "pecas": [6, 10, 19],        -> id das peças escolhidas nas bolinhas
     #   "categorias": [2, 6]         -> id das categorias de look (Verão, Festa...)
     # }
-    if "user_id" not in session:
-        return jsonify({"erro": "Não autorizado"}), 401
-
     dados = request.get_json(silent=True) or {}
     id_cliente = dados.get("id_cliente")
     titulo = (dados.get("titulo") or "").strip()
     # set() tira ids repetidos, caso a mesma peça venha duas vezes
-    ids_pecas = list({int(i) for i in dados.get("pecas") or []})
-    ids_categorias = list({int(i) for i in dados.get("categorias") or []})
+    # [REVISÃO] se vier algo que não é número (ex.: "abc"), antes o int() estourava
+    # um erro 500; agora a rota responde 400 com uma mensagem clara.
+    try:
+        ids_pecas = list({int(i) for i in dados.get("pecas") or []})
+        ids_categorias = list({int(i) for i in dados.get("categorias") or []})
+        id_cliente = int(id_cliente) if id_cliente else None
+    except (TypeError, ValueError):
+        return jsonify({"erro": "Dados do look inválidos."}), 400
 
     if not id_cliente or not titulo:
         return jsonify({"erro": "Informe o nome do look."}), 400
@@ -499,12 +592,10 @@ def salvar_look():
         return jsonify({"erro": "Erro ao salvar o look."}), 500
 
 @app.route("/excluir_look/<int:id_look>", methods=["POST"])
+@somente_consultora
 def excluir_look(id_look):
     # Apaga o look. As linhas de look_pecas e look_categoria somem sozinhas
     # (ON DELETE CASCADE no banco). As PEÇAS continuam existindo.
-    if "user_id" not in session:
-        return "", 401
-
     try:
         supabase_admin.table("looks").delete().eq("id_look", id_look).execute()
         return "", 200
@@ -582,9 +673,8 @@ def marcar_notificacoes_lidas():
         return "", 500
 
 @app.route("/adicionar_peca", methods=["POST"])
+@login_obrigatorio
 def adicionar_peca():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
     is_consultora = session.get("is_consultora", False)
     destino = "gerenciamento" if is_consultora else "adicionarPecaCliente"
 
@@ -596,8 +686,24 @@ def adicionar_peca():
     observacoes = request.form.get("observacoes", "").strip()
     imagem = request.files.get("imagem")
 
-    if not all([id_cliente, titulo, id_categoria, estacao, ocasiao, imagem]):
+    # [REVISÃO] o cliente só pode cadastrar peça para ELE MESMO. Antes o id_cliente
+    # vinha do formulário e podia ser alterado no navegador (DevTools) para salvar
+    # peças no guarda-roupa de outra pessoa. Para cliente, o id agora vem do login.
+    if not is_consultora:
+        try:
+            id_cliente = id_usuario_logado()
+        except Exception:
+            id_cliente = None
+
+    # [REVISÃO] input de arquivo vazio chega como um FileStorage sem nome;
+    # "imagem.filename" garante que um arquivo foi mesmo escolhido.
+    if not all([id_cliente, titulo, id_categoria, estacao, ocasiao]) or not imagem or not imagem.filename:
         flash("Preencha todos os campos.", "erro")
+        return redirect(url_for(destino))
+
+    # [REVISÃO] aceita só arquivos de imagem (evita subir PDF, .exe etc. no Cloudinary)
+    if not (imagem.mimetype or "").startswith("image/"):
+        flash("Envie um arquivo de imagem (JPG, PNG ou WEBP).", "erro")
         return redirect(url_for(destino))
     
     #fazer upload para o cloudinary
@@ -629,10 +735,8 @@ def adicionar_peca():
     return redirect(url_for(destino))
 
 @app.route("/excluir_peca/<int:id_peca>", methods=["POST"])
+@somente_consultora
 def excluir_peca(id_peca):
-    if "user_id" not in session:
-        return "", 401
-
     try:
         # busca a URL da imagem para deletar do Cloudinary
         resposta = supabase_admin.table("pecas") \
@@ -650,9 +754,14 @@ def excluir_peca(id_peca):
             .execute()
 
         # exclui do Cloudinary
+        # [REVISÃO] em try separado: se o Cloudinary falhar, a peça já saiu do banco
+        # e a tela não deve mostrar erro (antes devolvia 500 mesmo com a peça apagada).
         if url_imagem:
-            public_id = "pecas/" + url_imagem.split("/")[-1].split(".")[0]
-            cloudinary.uploader.destroy(public_id)
+            try:
+                public_id = "pecas/" + url_imagem.split("/")[-1].split(".")[0]
+                cloudinary.uploader.destroy(public_id)
+            except Exception:
+                app.logger.exception("Erro ao apagar a imagem no Cloudinary")
 
         return "", 200
 
@@ -660,13 +769,28 @@ def excluir_peca(id_peca):
         app.logger.exception("Erro ao excluir peça")
         return "", 500
 
+@app.route("/favoritar_peca/<int:id_peca>", methods=["POST"])
+@somente_consultora
+def favoritar_peca(id_peca):
+    # [NOVO] Liga/desliga a estrela de favorito da PEÇA (a coluna is_favorito já
+    # existia na tabela pecas, mas não havia rota para mudar). Usada pelo filtro
+    # "Favoritas" da aba Peças. Devolve o novo valor: {"is_favorito": true}
+    try:
+        resposta = supabase_admin.table("pecas").select("is_favorito") \
+            .eq("id_peca", id_peca).single().execute()
+        novo_valor = not resposta.data["is_favorito"]
+        supabase_admin.table("pecas").update({"is_favorito": novo_valor}).eq("id_peca", id_peca).execute()
+        return jsonify({"is_favorito": novo_valor}), 200
+    except Exception:
+        app.logger.exception("Erro ao favoritar peça")
+        return jsonify({"erro": "Erro ao favoritar a peça."}), 500
+
+
 # cadastro de pecas do cliente
 
 @app.route("/adicionar")
+@login_obrigatorio
 def adicionarPecaCliente():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
     try:
         resp_categorias = supabase_admin.table("categoria").select("id_categoria, nome").execute()
         categorias = resp_categorias.data
@@ -680,5 +804,139 @@ def adicionarPecaCliente():
     return render_template("adicionarPeca.html", categorias=categorias, id_cliente=id_cliente)
 
 
+
+# --- [NOVO] ANÚNCIOS: "roupas para comprar" ------------------------------------
+# A consultora cadastra peças de lojas (foto, preço, link). A cliente vê esses
+# anúncios no feed (marcados como "Patrocinado") e na aba COMPRAR.
+# Tabela: anuncio (veja backend/migracao_anuncios.sql).
+
+def _formatar_anuncio(anuncio):
+    # Deixa o anúncio no formato usado pelo JavaScript (preço como número)
+    cliente = anuncio.pop("usuario", None) or {}
+    anuncio["preco"] = float(anuncio["preco"]) if anuncio.get("preco") is not None else None
+    anuncio["cliente_nome"] = cliente.get("nome")
+    return anuncio
+
+
+@app.route("/anuncios")
+@login_obrigatorio
+def anuncios():
+    # Consultora: recebe TODOS os anúncios (ativos e pausados), para gerenciar.
+    # Cliente: recebe só os ATIVOS que são para todas (id_cliente vazio) ou para ela.
+    try:
+        consulta = supabase_admin.table("anuncio").select(
+            "id_anuncio, titulo, loja, preco, link, imagem, descricao, parte_corpo, "
+            "id_cliente, ativo, data, usuario(nome)"
+        ).order("data", desc=True)
+
+        if not session.get("is_consultora"):
+            # or_(...) = "id_cliente está vazio OU é o id desta cliente"
+            consulta = consulta.eq("ativo", True).or_(
+                f"id_cliente.is.null,id_cliente.eq.{id_usuario_logado()}"
+            )
+
+        return jsonify([_formatar_anuncio(a) for a in consulta.execute().data]), 200
+    except Exception:
+        app.logger.exception("Erro ao buscar anúncios")
+        return jsonify([]), 500
+
+
+@app.route("/adicionar_anuncio", methods=["POST"])
+@somente_consultora
+def adicionar_anuncio():
+    # Recebe o formulário da janela "Anúncios" da consultora (multipart, por causa da foto).
+    # A foto pode ser um ARQUIVO (sobe para o Cloudinary, pasta "anuncios")
+    # ou um LINK de imagem da própria loja.
+    titulo = request.form.get("titulo", "").strip()
+    loja = request.form.get("loja", "").strip()
+    link = request.form.get("link", "").strip()
+    descricao = request.form.get("descricao", "").strip()
+    link_imagem = request.form.get("link_imagem", "").strip()
+    imagem = request.files.get("imagem")
+
+    if not titulo:
+        return jsonify({"erro": "Dê um nome para o anúncio."}), 400
+
+    # links precisam começar com http(s): evita "javascript:..." dentro de um <a href>
+    for valor in (link, link_imagem):
+        if valor and not valor.lower().startswith(("http://", "https://")):
+            return jsonify({"erro": "Os links precisam começar com http:// ou https://"}), 400
+
+    # preço aceita "129,90" ou "129.90"; vazio = sem preço
+    preco = request.form.get("preco", "").strip().replace("R$", "").replace(" ", "")
+    try:
+        preco = float(preco.replace(".", "").replace(",", ".")) if "," in preco else (float(preco) if preco else None)
+    except ValueError:
+        return jsonify({"erro": "Preço inválido. Use, por exemplo, 129,90."}), 400
+
+    try:
+        parte_corpo = int(request.form["parte_corpo"]) if request.form.get("parte_corpo") else None
+        id_cliente = int(request.form["id_cliente"]) if request.form.get("id_cliente") else None
+    except ValueError:
+        return jsonify({"erro": "Dados inválidos."}), 400
+
+    try:
+        if imagem and imagem.filename:
+            if not (imagem.mimetype or "").startswith("image/"):
+                return jsonify({"erro": "Envie um arquivo de imagem (JPG, PNG ou WEBP)."}), 400
+            resultado = cloudinary.uploader.upload(
+                imagem, folder="anuncios", transformation=[{"width": 800, "crop": "limit"}]
+            )
+            url_imagem = resultado["secure_url"]
+        elif link_imagem:
+            url_imagem = link_imagem
+        else:
+            return jsonify({"erro": "Escolha uma foto ou cole o link da imagem."}), 400
+
+        novo = supabase_admin.table("anuncio").insert({
+            "titulo": titulo,
+            "loja": loja or None,
+            "preco": preco,
+            "link": link or None,
+            "imagem": url_imagem,
+            "descricao": descricao or None,
+            "parte_corpo": parte_corpo,
+            "id_cliente": id_cliente,
+            "ativo": True
+        }).execute()
+        return jsonify(novo.data[0]), 201
+    except Exception:
+        app.logger.exception("Erro ao adicionar anúncio")
+        return jsonify({"erro": "Erro ao salvar o anúncio."}), 500
+
+
+@app.route("/alternar_anuncio/<int:id_anuncio>", methods=["POST"])
+@somente_consultora
+def alternar_anuncio(id_anuncio):
+    # Pausa / reativa o anúncio (sem apagar). Devolve {"ativo": true/false}
+    try:
+        resposta = supabase_admin.table("anuncio").select("ativo").eq("id_anuncio", id_anuncio).single().execute()
+        novo_valor = not resposta.data["ativo"]
+        supabase_admin.table("anuncio").update({"ativo": novo_valor}).eq("id_anuncio", id_anuncio).execute()
+        return jsonify({"ativo": novo_valor}), 200
+    except Exception:
+        app.logger.exception("Erro ao pausar/ativar anúncio")
+        return jsonify({"erro": "Erro ao atualizar o anúncio."}), 500
+
+
+@app.route("/excluir_anuncio/<int:id_anuncio>", methods=["POST"])
+@somente_consultora
+def excluir_anuncio(id_anuncio):
+    try:
+        resposta = supabase_admin.table("anuncio").select("imagem").eq("id_anuncio", id_anuncio).single().execute()
+        url_imagem = resposta.data.get("imagem") or ""
+        supabase_admin.table("anuncio").delete().eq("id_anuncio", id_anuncio).execute()
+        # só apaga do Cloudinary se a foto foi enviada por nós (pasta "anuncios")
+        if "/anuncios/" in url_imagem:
+            try:
+                cloudinary.uploader.destroy("anuncios/" + url_imagem.split("/")[-1].split(".")[0])
+            except Exception:
+                app.logger.exception("Erro ao apagar a imagem do anúncio no Cloudinary")
+        return "", 200
+    except Exception:
+        app.logger.exception("Erro ao excluir anúncio")
+        return "", 500
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)

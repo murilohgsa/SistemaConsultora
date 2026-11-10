@@ -1,0 +1,309 @@
+/* =====================================================================
+   TELAS DA CLIENTE — estilo Instagram (feed, perfil e adicionar peça)
+   ---------------------------------------------------------------------
+   [NOVO VISUAL] Carregado DEPOIS do tema.css e do gerenciamento.css.
+   Os componentes comuns (barra superior, stories, cabeçalho do perfil,
+   abas, grade de fotos, janela de publicação) vêm do gerenciamento.css,
+   então a tela da cliente fica com a mesma cara da tela da consultora.
+   Aqui ficam só as partes que existem apenas para a cliente:
+     1. ajustes gerais e da barra superior
+     2. stories dos looks + visualizador em tela cheia
+     3. feed de publicações (looks e anúncios "Patrocinado")
+     4. aba COMPRAR
+     5. página "Meu perfil"
+     6. página "Adicionar peça"
+   ===================================================================== */
+
+/* o notificacoes.css usa estes nomes de cor (vindos do antigo login.css) */
+:root { --black: #111111; --accent: #a68a6e; }
+
+/* trava a rolagem da página enquanto o story está aberto */
+body.semRolagem { overflow: hidden; }
+
+
+/* =====================================================================
+   1. BARRA SUPERIOR
+   ===================================================================== */
+.barraTopo .acoesTopo { margin-left: auto; }
+.fotoTopo {
+  width: 30px;
+  height: 30px;
+  margin-left: 6px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--linha);
+  flex: none;
+}
+.fotoTopo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* chips de filtro com rolagem lateral (looks e comprar) */
+.chipsFiltro { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 12px; }
+.chipsFiltro .chip { flex: none; }
+
+
+/* =====================================================================
+   2. STORIES DOS LOOKS
+   ===================================================================== */
+.areaStories.semFiltros { padding-top: 22px; }
+/* a foto do story é uma peça (fundo branco): "contain" para não cortar a roupa */
+.fotoStoryLook { background: var(--branco); }
+.fotoStoryLook img { object-fit: contain; padding: 8px; }
+.storyCarregando .fotoStory { animation: piscar 1.2s infinite alternate; }
+@keyframes piscar { to { opacity: .4; } }
+.semStories { color: var(--cinza); font-size: .86rem; padding: 18px 0; }
+
+/* ---- visualizador em tela cheia ---- */
+.visualizadorStory {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+}
+.cartaoStory {
+  position: relative;
+  width: min(420px, 100%);
+  height: min(760px, 100%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  /* fundo branco: o fundo branco das fotos das peças "some" e o look
+     parece recortado (o mesmo efeito do feed) */
+  background: var(--branco);
+}
+
+/* barrinhas de progresso no topo (uma por look) */
+.barrasStory { display: flex; gap: 4px; padding: 10px 10px 0; position: relative; z-index: 3; }
+.barraStory { flex: 1; height: 2px; border-radius: 2px; background: rgba(17, 17, 17, .18); overflow: hidden; }
+.barraStory span { display: block; height: 100%; width: 0; background: var(--preto); }
+.barraStory.cheia span { width: 100%; }
+.barraStory .enchendo { animation: encherBarra linear forwards; }
+@keyframes encherBarra { to { width: 100%; } }
+
+.topoStory {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: .86rem;
+}
+.tempoStory { color: var(--cinza); font-size: .8rem; }
+.fecharStory {
+  margin-left: auto;
+  width: 34px; height: 34px;
+  border: 0; background: none; cursor: pointer; color: var(--preto);
+}
+.fecharStory svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.conteudoStory { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.lookStory { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px 16px; min-height: 0; }
+/* a colagem cabe na altura que sobra do story, sem cortar */
+.lookStory .colagemLook { width: auto; height: 100%; max-width: 100%; }
+.legendaStory {
+  position: relative;
+  border-top: 1px solid var(--linha);
+  z-index: 3;   /* fica acima das áreas invisíveis de avançar/voltar */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 18px 22px;
+}
+.legendaStory strong { font-family: var(--fonteTitulo); font-size: 1.4rem; font-weight: 500; }
+.legendaStory span { color: var(--destaque); font-size: .86rem; }
+.legendaStory .botao { margin-top: 6px; }
+
+/* metades invisíveis da tela para voltar/avançar */
+.voltarStory, .avancarStory {
+  position: absolute;
+  top: 70px;
+  bottom: 120px;
+  width: 40%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+}
+.voltarStory { left: 0; }
+.avancarStory { right: 0; }
+
+
+/* =====================================================================
+   3. FEED DE PUBLICAÇÕES
+   ===================================================================== */
+.listaPosts {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: min(470px, 100%);
+  margin: 12px auto 0;
+}
+.post {
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raioPequeno);
+  overflow: hidden;
+}
+.cabecalhoPostFeed { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.fotoAutor { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--campoFundo); flex: none; }
+.fotoAutor img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.iconeLoja { display: flex; align-items: center; justify-content: center; background: var(--destaqueFundo); }
+.iconeLoja svg { width: 18px; height: 18px; fill: none; stroke: var(--preto); stroke-width: 1.7; stroke-linejoin: round; }
+.autorFeed { display: flex; flex-direction: column; line-height: 1.2; font-size: .86rem; }
+.autorFeed small { color: var(--cinza); font-size: .74rem; }
+
+/* [NOVO VISUAL] quem montou o look aparece em DESTAQUE: nome na cor de
+   destaque do sistema (bege/marrom #a68a6e), com selo de consultora, e a
+   foto com o anel em degradê dos stories */
+.nomeConsultora {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--destaque);
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+.seloConsultora { width: 15px; height: 15px; flex: none; }
+.seloConsultora path { fill: var(--destaque); }
+.seloConsultora .check { fill: none; stroke: var(--branco); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.fotoConsultora {
+  padding: 2px;
+  background: linear-gradient(45deg, #d9c6ad, var(--destaque) 55%, var(--preto));
+}
+.fotoConsultora img { border-radius: 50%; border: 2px solid var(--branco); }
+
+/* foto da publicação: quadrada, com o look montado (boneco) no meio */
+.midiaFeed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 10px;
+  border: 0;
+  border-top: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha);
+  background: var(--branco);
+  cursor: pointer;
+}
+.midiaAnuncio { padding: 0; }
+.midiaAnuncio img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.acoesFeed { display: flex; gap: 2px; padding: 4px 6px 0; }
+.acoesFeed .botaoIcone svg { width: 24px; height: 24px; }
+.favoritado svg { fill: var(--estrela); stroke: var(--estrela); }
+
+.legendaFeed { display: flex; flex-direction: column; gap: 4px; padding: 4px 14px 14px; font-size: .88rem; }
+.legendaFeed p { margin: 0; line-height: 1.4; }
+.legendaFeed strong { font-weight: 600; }
+.hashtags { color: var(--destaque); }
+.verPecas { align-self: flex-start; padding: 0; border: 0; background: none; color: var(--cinza); font-size: .86rem; cursor: pointer; }
+.verPecas:hover { color: var(--preto); }
+.legendaFeed time { color: var(--cinzaClaro); font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; }
+
+/* faixa "Comprar >" embaixo da foto do anúncio (padrão dos anúncios do Instagram) */
+.faixaComprar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--linha);
+  background: var(--destaqueFundo);
+  color: var(--preto);
+  font-size: .88rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.faixaComprar svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.faixaComprar:hover { background: #e9e0d5; }
+.postAnuncio .legendaFeed { padding-top: 10px; }
+
+
+/* =====================================================================
+   4. COMPRAR
+   ===================================================================== */
+.introComprar { margin: 6px 0 12px; color: var(--cinza); font-size: .88rem; }
+.tileAnuncio > img { object-fit: cover; }
+/* etiqueta de preço no canto da foto (como "tags de produto") */
+.precoTile {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(17, 17, 17, .78);
+  color: var(--branco);
+  font-size: .76rem;
+  font-weight: 600;
+}
+.precoPost { margin: -6px 0 12px; font-size: 1.1rem; font-weight: 600; }
+.rodapeAnuncio { padding: 14px 16px; border-top: 1px solid var(--linha); }
+.linkLook { padding: 0; border: 0; background: none; color: var(--preto); font-weight: 600; font-size: .86rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.textoPost .rotuloSecao { display: block; margin: 16px 0 10px; }
+
+
+/* =====================================================================
+   5. MEU PERFIL (como o "Editar perfil" do Instagram)
+   ===================================================================== */
+.paginaSimples { max-width: 620px; margin: 0 auto; padding: 28px 20px 60px; }
+.voltarTopo { margin-right: 4px; }
+.tituloPaginaSimples { margin: 0 0 20px; font-size: 1.25rem; font-weight: 600; }
+
+.cartaoIdentidade {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: var(--campoFundo);
+  border-radius: 20px;
+}
+.cartaoIdentidade .fotoIdentidade { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; flex: none; background: var(--linha); }
+.cartaoIdentidade img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cartaoIdentidade div { display: flex; flex-direction: column; min-width: 0; }
+.cartaoIdentidade strong { font-size: 1rem; }
+.cartaoIdentidade span { color: var(--cinza); font-size: .86rem; overflow-wrap: anywhere; }
+
+.listaDados { list-style: none; margin: 0 0 28px; padding: 0; border: 1px solid var(--linha); border-radius: var(--raio); background: var(--branco); overflow: hidden; }
+.listaDados li { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-top: 1px solid var(--linha); }
+.listaDados li:first-child { border-top: 0; }
+.listaDados svg { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--preto); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.listaDados .rotulo { width: 150px; flex: none; font-weight: 600; font-size: .88rem; }
+.listaDados .valor { color: var(--cinza); font-size: .88rem; overflow-wrap: anywhere; }
+.botaoSairPerfil { width: 100%; height: 44px; border: 1px solid var(--linha); background: var(--branco); color: var(--erro); }
+.botaoSairPerfil:hover { background: var(--erroFundo); }
+
+
+/* =====================================================================
+   6. ADICIONAR PEÇA (como "Criar nova publicação")
+   ===================================================================== */
+.cartaoNovaPeca {
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  overflow: hidden;
+}
+.cartaoNovaPeca .cabecalhoModal { border-radius: 0; }
+.cartaoNovaPeca .areaFoto { min-height: 320px; }
+
+
+/* =====================================================================
+   CELULAR
+   ===================================================================== */
+@media (max-width: 735px) {
+  .listaPosts { gap: 12px; margin-top: 6px; }
+  .post { border-radius: 0; border-left: 0; border-right: 0; }
+  .chipsFiltro, .introComprar { padding-left: 14px; padding-right: 14px; }
+  .destaquesCliente { padding-top: 16px; }
+  .cartaoStory { border-radius: 0; height: 100%; }
+  .listaDados .rotulo { width: 110px; }
+  .paginaSimples { padding: 18px 14px 40px; }
+}

@@ -3,115 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Isabela Andrade — Guarda Roupa</title>
+<title>Isabela Andrade — Meu guarda-roupa</title>
+<!--
+  [NOVO VISUAL] Tela principal da CLIENTE, no mesmo estilo "Instagram" da tela
+  da consultora (mesmas cores e fontes originais: Bodoni Moda + Jost, preto/bege).
+  De cima para baixo:
+    1. barra superior: logo, comprar, adicionar peça, sininho e foto
+    2. "stories": um círculo para cada look (abre em tela cheia, como story)
+    3. cabeçalho do perfil: foto, nome e números (looks, peças, favoritos)
+    4. abas com ícones: FEED | LOOKS | PEÇAS | COMPRAR
+       - FEED: publicações dos looks, uma embaixo da outra, com anúncios
+               "Patrocinado" de roupas para comprar no meio
+       - LOOKS: grade de looks com busca e filtros
+       - PEÇAS: grade das peças da cliente, filtrável por parte do corpo
+       - COMPRAR: grade de roupas sugeridas pela consultora (anúncios)
+  Estilos: tema.css (base) + gerenciamento.css (componentes do layout Instagram,
+  os mesmos da consultora) + cliente.css (o que é só da cliente).
+  Lógica: static/cliente.js. O sininho continua no static/notificacoes.js.
+-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/login.css">
-<link rel="stylesheet" href="/static/feed.css">
-<link rel="stylesheet" href="/static/notificacoes.css">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,700;1,400&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/tema.css">
 <link rel="stylesheet" href="/static/boneco.css">
-<link rel="stylesheet" href="/static/looksCliente.css">
+<link rel="stylesheet" href="/static/gerenciamento.css">
+<link rel="stylesheet" href="/static/notificacoes.css">
+<link rel="stylesheet" href="/static/cliente.css">
 </head>
 <body>
 
-  <!-- barra superior: identidade da cliente e ações rápidas -->
-  <header class="barraCliente">
-    <div class="nomeCliente">Isabela Andrade</div>
-    <div class="acoesCliente">
-      <!-- lupa do topo: leva até o campo de busca do guarda-roupa -->
-      <button class="botaoIcone" id="btnBuscarLooks" type="button" aria-label="Buscar looks">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-      <button class="botaoAdicionar" type="button">
-        <a href="{{ url_for('adicionarPecaCliente') }}">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-          <span>Adicionar peça</span>
-        </a>
-      </button>
-      <!-- sininho: o número e a lista vêm de /notificacoes (static/notificacoes.js) -->
-      <div class="areaNotificacoes">
-        <button class="botaoIcone botaoNotificacao" id="btnNotificacoes" type="button"
-                aria-label="Notificações" aria-expanded="false" aria-controls="painelNotificacoes">
-          <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
-          <span class="contadorNotificacao" id="contadorNotificacoes" aria-hidden="true" hidden></span>
+  <!-- =================================================================
+       1. BARRA SUPERIOR
+       ================================================================= -->
+  <header class="barraTopo">
+    <div class="conteudoBarra">
+      <span class="logo">Isabela Andrade</span>
+
+      <div class="acoesTopo">
+        <!-- sacola: abre a aba COMPRAR -->
+        <button class="botaoIcone" type="button" data-ir-aba="comprar" aria-label="Roupas para comprar" title="Comprar">
+          <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
         </button>
-        <div class="painelNotificacoes" id="painelNotificacoes" role="dialog" aria-label="Notificações">
-          <p class="tituloNotificacoes">Notificações</p>
-          <ul class="listaNotificacoes" id="listaNotificacoes"></ul>
+        <a class="botaoIcone" href="{{ url_for('adicionarPecaCliente') }}" aria-label="Adicionar peça" title="Adicionar peça">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>
+        </a>
+        <!-- sininho: o número e a lista vêm de /notificacoes (static/notificacoes.js) -->
+        <div class="areaNotificacoes">
+          <button class="botaoIcone botaoNotificacao" id="btnNotificacoes" type="button"
+                  aria-label="Notificações" aria-expanded="false" aria-controls="painelNotificacoes">
+            <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 18.5a2 2 0 0 0 4 0"/></svg>
+            <span class="contadorNotificacao" id="contadorNotificacoes" aria-hidden="true" hidden></span>
+          </button>
+          <div class="painelNotificacoes" id="painelNotificacoes" role="dialog" aria-label="Notificações">
+            <p class="tituloNotificacoes">Notificações</p>
+            <ul class="listaNotificacoes" id="listaNotificacoes"></ul>
+          </div>
         </div>
+        <a href="{{ url_for('perfil') }}" class="fotoTopo" aria-label="Meu perfil" title="Meu perfil">
+          <img src="{{ cliente.foto_perfil or url_for('static', filename='img/foto_perfil.jpg') }}" alt="">
+        </a>
       </div>
-      <a href="{{ url_for('perfil') }}" class="fotoPerfil" aria-label="Meu perfil">
-        <img src="{{ cliente.foto_perfil or url_for('static', filename='img/foto_perfil.jpg') }}" alt="Foto de perfil">        
-      </a>
     </div>
-    
   </header>
 
-  <main class="mainFeed">
-    <section class="guardaRoupa" aria-labelledby="tituloGuardaRoupa">
+  <main class="paginaPerfil">
 
-      <!-- linhas decorativas de fundo, mesma linguagem visual da tela de login -->
-      <svg class="linhasFundo" viewBox="0 0 1200 700" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1" aria-hidden="true">
-        <path d="M0 60 C 220 160, 380 20, 560 120 C 740 220, 900 40, 1200 140"/>
-        <path d="M0 140 C 240 240, 400 100, 580 200 C 760 300, 920 120, 1200 220"/>
-        <path d="M0 220 C 260 320, 420 180, 600 280 C 780 380, 940 200, 1200 300"/>
-        <path d="M0 420 C 220 340, 380 500, 560 420 C 740 340, 900 500, 1200 420"/>
-        <path d="M0 500 C 240 420, 400 580, 580 500 C 760 420, 920 580, 1200 500"/>
-        <path d="M0 580 C 260 500, 420 640, 600 580 C 780 520, 940 640, 1200 580"/>
-      </svg>
+    <!-- =================================================================
+         2. STORIES — um círculo para cada look (mais novo primeiro)
+         [NOVO] o anel colorido marca os looks que a cliente ainda não viu.
+         Clicar abre o look em tela cheia, como um story do Instagram.
+         ================================================================= -->
+    <section class="areaStories semFiltros" aria-label="Seus looks em destaque">
+      <ul class="stories" id="storiesLooks" role="list">
+        <li class="storyCarregando"><span class="anelStory semAnel"><span class="fotoStory"></span></span></li>
+      </ul>
+    </section>
 
-      <div class="cabecalhoGuardaRoupa">
-        <div class="tituloGuardaRoupa">
-          <svg viewBox="0 0 24 24"><path d="M12 3a2 2 0 0 1 2 2c0 .9-.6 1.6-1.4 1.9L20 12.5c1 .6 1.6 1.6 1.6 2.7v.3H2.4v-.3c0-1.1.6-2.1 1.6-2.7l7.4-5.6C10.6 6.6 10 5.9 10 5a2 2 0 0 1 2-2Z"/><line x1="2.4" y1="18.5" x2="21.6" y2="18.5"/></svg>
-          <h2 id="tituloGuardaRoupa">Guarda Roupa</h2>
-          <!-- quantidade de looks mostrados (preenchido pelo JS) -->
-          <span class="contagemLooks" id="contagemLooks"></span>
+    <!-- =================================================================
+         3. CABEÇALHO DO PERFIL DA CLIENTE
+         ================================================================= -->
+    <section class="cabecalhoPerfil" aria-label="Meu perfil">
+      <div class="fotoPerfilGrande"><img src="{{ cliente.foto_perfil or url_for('static', filename='img/foto_perfil.jpg') }}" alt=""></div>
+      <div class="infoPerfil">
+        <div class="linhaNome">
+          <h1>{{ cliente.nome or 'Meu guarda-roupa' }}</h1>
+          <div class="botoesPerfil">
+            <a class="botao botaoPrimario" href="{{ url_for('adicionarPecaCliente') }}">Adicionar peça</a>
+            <a class="botao botaoSecundario" href="{{ url_for('perfil') }}">Editar perfil</a>
+          </div>
         </div>
+        <ul class="numerosPerfil" aria-label="Resumo">
+          <li><strong id="numLooks">0</strong> looks</li>
+          <li><strong id="numPecas">0</strong> peças</li>
+          <li><strong id="numFavoritos">0</strong> favoritos</li>
+        </ul>
+        <div class="bioPerfil">
+          <span class="emailPerfil">Consultoria Isabela Andrade</span>
+          <span class="dicaPerfil">Looks montados pela sua consultora, especialmente para você.</span>
+        </div>
+      </div>
+    </section>
 
-        <!-- busca pelo nome do look ou de uma peça -->
-        <label class="buscaLooks">
+    <!-- =================================================================
+         4. ABAS
+         ================================================================= -->
+    <nav class="abasPerfil" role="tablist" aria-label="Seções">
+      <button class="abaPerfil" type="button" role="tab" aria-selected="true" data-aba="feed">
+        <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21H3Z"/><path d="M9 21v-6h6v6"/></svg>
+        <span>Feed</span>
+      </button>
+      <button class="abaPerfil" type="button" role="tab" aria-selected="false" data-aba="looks">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.5"/><path d="M8 21l1-9-3-4h12l-3 4 1 9"/></svg>
+        <span>Looks</span>
+      </button>
+      <button class="abaPerfil" type="button" role="tab" aria-selected="false" data-aba="pecas">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+        <span>Peças</span>
+      </button>
+      <button class="abaPerfil" type="button" role="tab" aria-selected="false" data-aba="comprar">
+        <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span>Comprar</span>
+      </button>
+    </nav>
+
+    <!-- ABA FEED: publicações dos looks + anúncios no meio -->
+    <div class="painelAba" id="painel-feed" role="tabpanel">
+      <div class="listaPosts" id="listaPosts">
+        <div class="estadoVazio">Carregando seus looks...</div>
+      </div>
+    </div>
+
+    <!-- ABA LOOKS: grade com busca e filtros (Todos, Favoritos, categorias) -->
+    <div class="painelAba" id="painel-looks" role="tabpanel" hidden>
+      <div class="barraFiltros">
+        <label class="campoBusca buscaFiltro">
+          <span class="somenteLeitor">Pesquisar look</span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" id="buscaLooks" placeholder="Buscar look ou peça..." aria-label="Buscar look ou peça">
+          <input class="campo" type="search" id="buscaLooks" placeholder="Pesquisar look ou peça" autocomplete="off">
         </label>
       </div>
+      <div class="chipsFiltro" id="filtrosLooks" role="toolbar" aria-label="Filtrar looks"></div>
+      <div class="linhaContagem"><span id="contagemLooks" aria-live="polite"></span></div>
+      <div class="gradeFotos" id="gradeLooks"></div>
+    </div>
 
-      <!--
-        Filtros: "Todos", "Favoritos" e as categorias de look (Inverno, Festa...).
-        Só aparecem as categorias que os looks deste cliente usam.
-        Montado pelo static/looksCliente.js.
-      -->
-      <div class="filtrosLooks" id="filtrosLooks" role="toolbar" aria-label="Filtrar looks"></div>
+    <!-- ABA PEÇAS: guarda-roupa da cliente -->
+    <div class="painelAba" id="painel-pecas" role="tabpanel" hidden>
+      <!-- destaques: um círculo por parte do corpo (filtra a grade) -->
+      <ul class="destaques destaquesCliente" id="destaquesPecas" role="list" aria-label="Peças por parte do corpo"></ul>
+      <div class="barraFiltros">
+        <label class="campoBusca buscaFiltro">
+          <span class="somenteLeitor">Pesquisar peça</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="campo" type="search" id="buscaPecas" placeholder="Pesquisar peça" autocomplete="off">
+        </label>
+        <select class="campo campoPequeno" id="filtroEstacaoPecas" aria-label="Filtrar por estação">
+          <option value="">Todas as estações</option>
+          <option>Verão</option><option>Outono</option><option>Inverno</option><option>Primavera</option>
+        </select>
+      </div>
+      <div class="linhaContagem"><span id="contagemPecas" aria-live="polite"></span></div>
+      <div class="gradeFotos" id="gradePecas"></div>
+    </div>
 
-      <!-- looks criados pela consultora para este cliente (vêm de /meus_looks) -->
-      <ul class="grade" id="gradeLooks" role="list">
-        <li class="avisoLooks">Carregando seus looks...</li>
-      </ul>
+    <!-- ABA COMPRAR: roupas sugeridas pela consultora (tabela anuncio) -->
+    <div class="painelAba" id="painel-comprar" role="tabpanel" hidden>
+      <p class="introComprar">Sugestões da sua consultora para completar o guarda-roupa.</p>
+      <div class="chipsFiltro" id="filtrosComprar" role="toolbar" aria-label="Filtrar por parte do corpo"></div>
+      <div class="gradeFotos" id="gradeComprar"></div>
+    </div>
 
-    </section>
   </main>
 
-  <!--
-    Detalhe do look: abre ao clicar num card (ou numa notificação).
-    Mostra o boneco grande, as categorias e a lista de peças por parte do corpo.
-  -->
-  <div class="modalDetalheLook" id="modalDetalheLook" role="dialog" aria-modal="true" aria-labelledby="tituloDetalheLook">
-    <div class="cartaoDetalheLook">
-      <button class="fecharDetalheLook" id="fecharDetalheLook" type="button" aria-label="Fechar">
-        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-      <!-- conteúdo montado pelo static/looksCliente.js -->
-      <div id="conteudoDetalheLook"></div>
+  <!-- detalhe de look, peça ou anúncio ("publicação" aberta). Preenchido pelo JS. -->
+  <div class="modal" id="modalPost" role="dialog" aria-modal="true" aria-label="Detalhe">
+    <button class="fecharPost" type="button" data-fechar-modal aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="cartaoPost" id="conteudoPost"></div>
+  </div>
+
+  <!-- [NOVO] visualizador de story (look em tela cheia, troca sozinho a cada 6s) -->
+  <div class="visualizadorStory" id="visualizadorStory" role="dialog" aria-modal="true" aria-label="Story do look" hidden>
+    <div class="cartaoStory">
+      <div class="barrasStory" id="barrasStory"></div>
+      <div class="topoStory">
+        <span class="fotoAutor fotoConsultora"><img src="{{ url_for('static', filename='img/avatar_generico.svg') }}" alt=""></span>
+        <!-- [NOVO VISUAL] nome da consultora em destaque (mesma cor do feed) -->
+        <strong class="nomeConsultora">Isabela Andrade</strong>
+        <span class="tempoStory" id="tempoStory"></span>
+        <button class="fecharStory" type="button" id="fecharStory" aria-label="Fechar">
+          <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="conteudoStory" id="conteudoStory"></div>
+      <!-- metades invisíveis: tocar à esquerda volta, à direita avança -->
+      <button class="voltarStory" type="button" id="voltarStory" aria-label="Look anterior"></button>
+      <button class="avancarStory" type="button" id="avancarStory" aria-label="Próximo look"></button>
     </div>
   </div>
 
-  <!-- aviso que aparece no canto quando a consultora cria um look novo -->
+  <!-- aviso rápido (toast) e aviso de look novo (usado pelo notificacoes.js) -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="avisoNovoLook" id="avisoNovoLook" role="status" hidden></div>
 
 </body>
-<script src="/static/script.js"></script>
-<!-- boneco.js antes do looksCliente.js, que usa o montarBoneco dele -->
+<!-- [REVISÃO] removido <script src="/static/script.js">: o arquivo não existe no projeto (dava erro 404 no console) -->
+<!-- boneco.js antes do cliente.js, que usa PARTES_CORPO, escaparHtml e montarBoneco dele -->
 <script src="/static/boneco.js"></script>
-<script src="/static/looksCliente.js"></script>
+<script src="/static/cliente.js"></script>
 <script src="/static/notificacoes.js"></script>
 </html>

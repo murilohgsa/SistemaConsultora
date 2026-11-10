@@ -1,70 +1,287 @@
 /* =====================================================================
-   BONECO DO LOOK (compartilhado) — usado no gerenciamento e no feed
+   BONECO / MANEQUIM (compartilhado) — usado no gerenciamento e no feed
    ---------------------------------------------------------------------
-   Coluna central: cabeça, tronco, cintura e pés, de cima para baixo.
-   Coluna lateral: acessórios. As imagens usam object-fit: contain para a
-   peça aparecer inteira, e várias peças da mesma parte se sobrepõem um pouco.
-   O HTML é gerado pela função montarBoneco() em static/boneco.js.
+   Duas partes:
+     1. .bonecoLook  -> miniatura do look (grade de looks, detalhe, feed)
+     2. .manequim    -> [NOVO] manequim grande com áreas de arrastar e soltar
+   O HTML é gerado em static/boneco.js (montarBoneco / montarManequim).
+
+   [NOVO VISUAL] Cores ORIGINAIS do sistema, fundo claro e limpo:
+     preto #111111, bege #a68a6e, linhas #e6e2da.
+   Os valores depois da vírgula em var(--x, valor) são "reservas": o feed
+   não carrega o tema.css, então ele usa esses valores direto.
    ===================================================================== */
-.bonecoLook {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
 
-.corpoBoneco {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-}
-
-.faixaBoneco {
-  display: flex;
-  justify-content: center;
+/* ---------------------------------------------------------------------
+   1. MINIATURA DO LOOK — COLAGEM  [NOVO VISUAL]
+   ---------------------------------------------------------------------
+   Grade quadrada de cartões. O 1º cartão é a peça principal e, conforme
+   a quantidade, ele ocupa mais espaço (2 linhas). Cada classe qtdN
+   desenha a grade para N peças sem deixar buraco:
+     qtd1 [ A ]        qtd2 [A|B]        qtd3 [A|B]  (A ocupa 2 linhas)
+                                              [A|C]
+     qtd4 2x2          qtd5 [A|B|C]      qtd6 3x2
+                            [A|D|E]
+     qtd7/qtd8: 3x3 com o A ocupando 2 linhas     qtd9: 3x3
+   --------------------------------------------------------------------- */
+.colagemLook {
+  display: grid;
+  gap: 6px;
   width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 100%;
+  margin: 0 auto;
+}
+.colagemLook.qtd1 { grid-template: 1fr / 1fr; }
+.colagemLook.qtd2 { grid-template: 1fr / repeat(2, 1fr); }
+.colagemLook.qtd3 { grid-template: repeat(2, 1fr) / repeat(2, 1fr); }
+.colagemLook.qtd4 { grid-template: repeat(2, 1fr) / repeat(2, 1fr); }
+.colagemLook.qtd5 { grid-template: repeat(2, 1fr) / repeat(3, 1fr); }
+.colagemLook.qtd6 { grid-template: repeat(2, 1fr) / repeat(3, 1fr); }
+.colagemLook.qtd7,
+.colagemLook.qtd8,
+.colagemLook.qtd9 { grid-template: repeat(3, 1fr) / repeat(3, 1fr); }
+/* peça principal ocupando 2 linhas */
+.colagemLook.qtd3 > :first-child,
+.colagemLook.qtd5 > :first-child,
+.colagemLook.qtd7 > :first-child,
+.colagemLook.qtd8 > :first-child { grid-row: span 2; }
+/* com 7 peças sobra 1 espaço: a peça principal ocupa 2x2 */
+.colagemLook.qtd7 > :first-child { grid-column: span 2; }
+
+.cartaoColagem {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  /* bege bem claro das cores originais */
+  background: #f4f0ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cartaoColagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10%;
+  /* "multiply" funde o fundo branco da foto com o bege do cartão:
+     a roupa parece recortada, sem o quadrado branco em volta */
+  mix-blend-mode: multiply;
+  transition: transform .3s ease;
+}
+.cartaoColagem:hover img { transform: scale(1.05); }
+.maisPecas { background: var(--preto, #111111); color: #fff; font-size: 1.1rem; font-weight: 600; }
+
+/* em miniaturas pequenas (grade 3 por linha) os cartões ficam mais justos */
+.tileFoto .colagemLook { gap: 3px; }
+.tileFoto .cartaoColagem { border-radius: 6px; }
+.tileFoto .cartaoColagem img { padding: 6%; }
+
+
+/* ---------------------------------------------------------------------
+   2. MANEQUIM INTERATIVO  [NOVO]
+   ---------------------------------------------------------------------
+   .manequim tem a MESMA proporção do SVG (200 x 460). As zonas são
+   posicionadas em % sobre ele, então encaixam no corpo em qualquer tamanho.
+   --------------------------------------------------------------------- */
+.manequim {
+  position: relative;
+  width: min(100%, 250px);
+  aspect-ratio: 200 / 460;
+  margin: 0 auto;
 }
 
-.faixaBoneco img,
-.acessoriosBoneco img {
+.corpoManequim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 12px 18px rgba(17, 17, 17, .12));
+}
+
+/* luz suave atrás do manequim (bem discreta no fundo claro) */
+.holofote {
+  position: absolute;
+  inset: -6% -10%;
+  background: radial-gradient(closest-side, rgba(166, 138, 110, .12), transparent 70%);
+  pointer-events: none;
+}
+
+/* "balançar": o manequim treme quando tenta salvar um look vazio */
+.manequim.balancar { animation: balancar .4s; }
+@keyframes balancar {
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ---- áreas de soltar ---- */
+.zonaManequim {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 1.5px dashed transparent;
+  transition: border-color .2s, background .2s, transform .2s;
+}
+
+/* posição de cada área sobre o corpo (em % do quadro 200 x 460) */
+.zonaCabeca  { top: 0%;  left: 30%; width: 40%; height: 15%; }
+.zonaTronco  { top: 16%; left: 17%; width: 66%; height: 33%; }
+.zonaPernas  { top: 48%; left: 26%; width: 48%; height: 43%; }
+.zonaPes     { top: 88%; left: 28%; width: 44%; height: 12%; }
+
+/* rótulo da área (pílula preta, como as etiquetas de marcação do Instagram):
+   aparece ao passar o mouse e enquanto arrasta uma peça */
+.rotuloZona {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: rgba(17, 17, 17, .82);
+  color: #fff;
+  font-size: .68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+  z-index: 3;
+}
+.rotuloZona svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+
+.zonaManequim:hover { border-color: var(--linhaForte, #d8d3ca); }
+.zonaManequim:not(.ocupada):hover .rotuloZona { opacity: 1; }
+
+/* enquanto ARRASTA uma peça (classe colocada no <body> pelo JS):
+   todas as áreas aparecem tracejadas e a área certa da peça fica bege */
+.arrastandoPeca .zonaManequim { border-color: var(--linhaForte, #d8d3ca); }
+.arrastandoPeca .zonaManequim .rotuloZona { opacity: .5; }
+.arrastandoPeca .zonaManequim.zonaAlvo {
+  border-color: var(--destaque, #a68a6e);
+  background: rgba(166, 138, 110, .12);
+}
+.arrastandoPeca .zonaManequim.zonaAlvo .rotuloZona { opacity: 1; }
+/* área sob o cursor no momento */
+.zonaManequim.sobre { transform: scale(1.03); background: rgba(166, 138, 110, .2); }
+
+/* ---- peças "vestidas" no manequim ---- */
+.pecasZona {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pecaVestida {
+  position: relative;
+  margin: 0;
+  height: 88%;   /* um pouco menor que a área: o contorno do manequim continua aparecendo */
+  flex: 0 1 auto;
+  min-width: 0;
+  cursor: grab;
+  animation: vestirPeca .3s ease-out;
+}
+/* várias peças na mesma parte se sobrepõem, como camadas de roupa */
+.pecaVestida + .pecaVestida { margin-left: -18%; }
+.pecaVestida:active { cursor: grabbing; }
+
+/* foto da peça num cartão branco com borda fina (visual "clean") */
+.pecaVestida img {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
   object-fit: contain;
   border-radius: 10px;
   background: #fff;
-  mix-blend-mode: multiply;   /* fundo branco das fotos some no fundo claro */
-  transition: transform .2s;
+  padding: 4px;
+  border: 1px solid var(--linha, #e6e2da);
+  box-shadow: 0 6px 16px rgba(17, 17, 17, .12);
 }
 
-/* com várias peças na mesma parte, as fotos encolhem para caber na largura
-   do boneco (sem isso, duas peças de tronco passavam por cima dos acessórios) */
-.faixaBoneco img {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-/* peças da mesma parte ficam levemente sobrepostas */
-.faixaBoneco img + img { margin-left: -14px; }
-
-.faixaBoneco img:hover,
-.acessoriosBoneco img:hover {
-  transform: scale(1.06);
-  position: relative;
-  z-index: 1;
-}
-
-/* tamanho de cada parte, proporcional ao corpo */
-.faixaCabeca img   { height: 52px;  max-width: 64px; }
-.faixaTronco img   { height: 120px; max-width: 120px; }
-.faixaCintura img  { height: 120px; max-width: 110px; }
-.faixaPes img      { height: 54px;  max-width: 70px; }
-
-.acessoriosBoneco {
+/* botão X para tirar a peça do manequim */
+.removerPecaVestida {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--preto, #111111);
+  color: #fff;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 6px;
-  flex: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(.8);
+  transition: opacity .2s, transform .2s, background .2s;
+  z-index: 2;
+}
+.removerPecaVestida svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.pecaVestida:hover .removerPecaVestida,
+.removerPecaVestida:focus-visible { opacity: 1; transform: none; }
+.removerPecaVestida:hover { background: var(--erro, #b6392f); }
+
+/* em telas de toque não existe "hover": o X fica sempre visível */
+@media (hover: none) {
+  .removerPecaVestida { opacity: 1; transform: none; }
+  .rotuloZona { opacity: .6; }
 }
 
-.acessoriosBoneco img { width: 46px; height: 46px; }
+@keyframes vestirPeca {
+  from { opacity: 0; transform: scale(.7); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- bandeja de acessórios embaixo do manequim ---- */
+.zonaAcessorios {
+  position: relative;
+  min-height: 110px;
+  width: 100%;
+  margin-top: 16px;
+  border: 1.5px dashed var(--linhaForte, #d8d3ca);
+  border-radius: 12px;
+  background: #fff;
+  padding: 34px 10px 10px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.zonaAcessorios .rotuloZona {
+  top: 10px;
+  transform: translateX(-50%);
+  opacity: 1;
+  background: transparent;
+  color: var(--cinza, #6f6b64);
+  padding: 0;
+}
+.zonaAcessorios .pecasZona {
+  height: auto;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-content: flex-start;
+}
+.zonaAcessorios .pecaVestida { height: 64px; width: 64px; flex: none; }
+.zonaAcessorios .pecaVestida + .pecaVestida { margin-left: 0; }
+.zonaAcessorios .pecaVestida img { width: 64px; height: 64px; }
+.zonaAcessorios:not(.ocupada)::after {
+  content: 'Bolsas, colares, óculos, cintos...';
+  display: block;
+  width: 100%;
+  text-align: center;
+  color: var(--cinzaClaro, #9b968e);
+  font-size: .75rem;
+}
